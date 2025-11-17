@@ -1,206 +1,107 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import '../main.dart';  // import MyApp for dummy data reference
+import 'change_password_page.dart';
+import 'error_page.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
-
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  _LoginPageState createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final TextEditingController nippController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+  // controllers for text fields
+  final TextEditingController _nippController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
-  bool isLoading = false;
-  bool showPassword = false;
+  // method to handle login button press
+  void _handleLogin() {
+    String enteredNIPP = _nippController.text;
+    String enteredPassword = _passwordController.text;
 
-  Future<void> loginProcess() async {
-    setState(() => isLoading = true);
-
-    final url = Uri.parse("https://your-api-domain.com/api/login");
-
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "nipp": nippController.text.trim(),
-        "password": passwordController.text.trim(),
-        "device_name": "Flutter Mobile Device"
-      }),
-    );
-
-    setState(() => isLoading = false);
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-
-      final token = data["token"];
-      final role = data["user"]["role"];
-      final first = data["is_first_login"];
-
-      if (first == true) {
-        Navigator.pushReplacementNamed(context, "/change-password");
-        return;
-      }
-
-      if (role == "Pengawas") {
-        Navigator.pushReplacementNamed(context, "/dashboard-pengawas");
-      } else if (role == "Mekanik") {
-        Navigator.pushReplacementNamed(context, "/dashboard-mekanik");
-      }
-    } else if (response.statusCode == 401) {
-      _showError("NIPP atau Password salah.");
-    } else if (response.statusCode == 422) {
-      _showError("Data yang diberikan tidak valid.");
+    if (enteredNIPP.isEmpty || enteredPassword.isEmpty) {
+      // jika ada input yang kosong, tampilkan halaman error
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ErrorPage()),
+      );
     } else {
-      _showError("Terjadi kesalahan pada server.");
+      // cek kredensial dummy
+      if (enteredNIPP == MyApp.dummyNIPP && enteredPassword == MyApp.dummyPassword) {
+        if (MyApp.isFirstLogin) {
+          // Login pertama kali -> navigasi ke halaman ganti password
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ChangePasswordPage()),
+          );
+        } else {
+          // Login sukses (bukan pertama kali) -> 
+          // (Dalam kasus ini, langsung menuju halaman utama aplikasi. 
+          // Karena backend tidak diimplementasikan, kita tidak membuat halaman utama di sini)
+          // Untuk demo, kita bisa beri informasi login berhasil.
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Login berhasil!'))
+          );
+          // TODO: Navigasi ke beranda utama jika diperlukan.
+        }
+      } else {
+        // kredensial salah -> navigasi ke halaman error
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ErrorPage()),
+        );
+      }
     }
-  }
-
-  void _showError(String message) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text("GAGAL"),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("OK"),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 35),
-
-              // LOGO KAI (gelap-besar, sesuai figma)
-              Image.asset(
-                "assets/images/logo warna.png",
-                width: 160,
-              ),
-
-              const SizedBox(height: 60),
-
-              // FIELD NIPP
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "NIPP",
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey[700],
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Center(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Logo perusahaan (misalnya logo KAI)
+                  // Untuk demo, gunakan placeholder container atau text.
+                  // Ganti dengan Image.asset('assets/kai_logo.png') jika tersedia.
+                  Container(
+                    height: 150,
+                    child: Center(child: Text('LOGO KAI', style: TextStyle(fontSize: 24))),
                   ),
-                ),
-              ),
-              const SizedBox(height: 6),
-              _roundedInput(
-                controller: nippController,
-                hint: "Masukkan NIPP",
-                keyboard: TextInputType.number,
-              ),
-
-              const SizedBox(height: 20),
-
-              // FIELD PASSWORD
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "Kata Sandi",
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey[700],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 6),
-              _roundedInput(
-                controller: passwordController,
-                hint: "Masukkan Kata Sandi",
-                obscure: !showPassword,
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    showPassword ? Icons.visibility_off : Icons.visibility,
-                    color: Colors.grey,
-                  ),
-                  onPressed: () {
-                    setState(() => showPassword = !showPassword);
-                  },
-                ),
-              ),
-
-              const SizedBox(height: 40),
-
-              // BUTTON MASUK
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1F2B7B),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(40),
+                  SizedBox(height: 32),
+                  // Input NIPP
+                  TextField(
+                    controller: _nippController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: 'NIPP',
+                      hintText: 'Masukkan NIPP',
+                      border: OutlineInputBorder(),
                     ),
                   ),
-                  onPressed: isLoading ? null : loginProcess,
-                  child: isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                          "MASUK",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                ),
+                  SizedBox(height: 16),
+                  // Input Password
+                  TextField(
+                    controller: _passwordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      labelText: 'Kata Sandi',
+                      hintText: 'Masukkan Kata Sandi',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  SizedBox(height: 24),
+                  // Tombol MASUK
+                  ElevatedButton(
+                    onPressed: _handleLogin,
+                    child: Text('MASUK'),
+                  ),
+                ],
               ),
-
-              const SizedBox(height: 40),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _roundedInput({
-    required TextEditingController controller,
-    required String hint,
-    bool obscure = false,
-    TextInputType keyboard = TextInputType.text,
-    Widget? suffixIcon,
-  }) {
-    return Container(
-      height: 52,
-      decoration: BoxDecoration(
-        color: const Color(0xFFF4F4F4),
-        borderRadius: BorderRadius.circular(40),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 18),
-      child: Center(
-        child: TextField(
-          controller: controller,
-          obscureText: obscure,
-          keyboardType: keyboard,
-          decoration: InputDecoration(
-            border: InputBorder.none,
-            hintText: hint,
-            suffixIcon: suffixIcon,
+            ),
           ),
         ),
       ),

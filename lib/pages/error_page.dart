@@ -1,39 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ErrorPage extends StatelessWidget {
+  const ErrorPage({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Icon gagal/error
-                Icon(Icons.error_outline, color: Colors.red, size: 100),
-                SizedBox(height: 16),
-                Text(
-                  'GAGAL',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.highlight_off, color: Colors.red, size: 80.0),
+              const SizedBox(height: 16.0),
+              Text(
+                'GAGAL',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 24.0, fontWeight: FontWeight.bold, color: Colors.black87),
+              ),
+              const SizedBox(height: 8.0),
+              Text(
+                'Data yang diberikan tidak valid',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(fontSize: 16.0, color: Colors.black87),
+              ),
+              const SizedBox(height: 24.0),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+                  backgroundColor: Theme.of(context).primaryColor,
+                  foregroundColor: Colors.white,
                 ),
-                SizedBox(height: 8),
-                Text(
-                  'Data yang diberikan tidak valid',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16),
+                onPressed: () {
+                  // Kembali ke halaman sebelumnya (form ganti password) untuk perbaiki input
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  'KEMBALI',
+                  style: GoogleFonts.plusJakartaSans(fontSize: 16.0, fontWeight: FontWeight.w600),
                 ),
-                SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: () {
-                    // Kembali ke halaman sebelumnya
-                    Navigator.pop(context);
-                  },
-                  child: Text('KEMBALI'),
-                ),
-              ],
-            ),
+              )
+            ],
           ),
         ),
       ),

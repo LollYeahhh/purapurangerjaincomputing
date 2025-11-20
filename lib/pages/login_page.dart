@@ -1,107 +1,117 @@
 import 'package:flutter/material.dart';
-import '../main.dart';  // import MyApp for dummy data reference
-import 'change_password_page.dart';
-import 'error_page.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class LoginPage extends StatefulWidget {
+  const LoginPage({Key? key}) : super(key: key);
+
   @override
-  _LoginPageState createState() => _LoginPageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
-  // controllers for text fields
-  final TextEditingController _nippController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-
-  // method to handle login button press
-  void _handleLogin() {
-    String enteredNIPP = _nippController.text;
-    String enteredPassword = _passwordController.text;
-
-    if (enteredNIPP.isEmpty || enteredPassword.isEmpty) {
-      // jika ada input yang kosong, tampilkan halaman error
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => ErrorPage()),
-      );
-    } else {
-      // cek kredensial dummy
-      if (enteredNIPP == MyApp.dummyNIPP && enteredPassword == MyApp.dummyPassword) {
-        if (MyApp.isFirstLogin) {
-          // Login pertama kali -> navigasi ke halaman ganti password
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => ChangePasswordPage()),
-          );
-        } else {
-          // Login sukses (bukan pertama kali) -> 
-          // (Dalam kasus ini, langsung menuju halaman utama aplikasi. 
-          // Karena backend tidak diimplementasikan, kita tidak membuat halaman utama di sini)
-          // Untuk demo, kita bisa beri informasi login berhasil.
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Login berhasil!'))
-          );
-          // TODO: Navigasi ke beranda utama jika diperlukan.
-        }
-      } else {
-        // kredensial salah -> navigasi ke halaman error
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => ErrorPage()),
-        );
-      }
-    }
-  }
+  bool _obscurePassword = true; // state untuk mengatur visibilitas kata sandi
 
   @override
   Widget build(BuildContext context) {
+    // Warna utama (oranye) diambil dari tema
+    final Color primaryColor = Theme.of(context).primaryColor;
+
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Center(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Logo perusahaan (misalnya logo KAI)
-                  // Untuk demo, gunakan placeholder container atau text.
-                  // Ganti dengan Image.asset('assets/kai_logo.png') jika tersedia.
-                  Container(
-                    height: 150,
-                    child: Center(child: Text('LOGO KAI', style: TextStyle(fontSize: 24))),
-                  ),
-                  SizedBox(height: 32),
-                  // Input NIPP
-                  TextField(
-                    controller: _nippController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: 'NIPP',
-                      hintText: 'Masukkan NIPP',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  // Input Password
-                  TextField(
-                    controller: _passwordController,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      labelText: 'Kata Sandi',
-                      hintText: 'Masukkan Kata Sandi',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  SizedBox(height: 24),
-                  // Tombol MASUK
-                  ElevatedButton(
-                    onPressed: _handleLogin,
-                    child: Text('MASUK'),
-                  ),
-                ],
+      backgroundColor: Colors.white,
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Logo perusahaan di atas form login
+              Image.asset(
+                'assets/logo_warna.png',
+                height: 80.0,
               ),
-            ),
+              const SizedBox(height: 24.0),
+              // Input NIPP
+              TextFormField(
+                style: GoogleFonts.inter(fontSize: 16.0),
+                decoration: InputDecoration(
+                  labelText: 'NIPP',
+                  labelStyle: GoogleFonts.inter(fontSize: 14.0),
+                  hintText: 'Masukkan NIPP',
+                  hintStyle: GoogleFonts.inter(fontSize: 14.0, color: Colors.grey[500]),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: BorderSide(color: Colors.grey.shade400),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: BorderSide(color: primaryColor, width: 2.0),
+                  ),
+                ),
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 16.0),
+              // Input Kata Sandi
+              TextFormField(
+                style: GoogleFonts.inter(fontSize: 16.0),
+                obscureText: _obscurePassword,
+                decoration: InputDecoration(
+                  labelText: 'Kata Sandi',
+                  labelStyle: GoogleFonts.inter(fontSize: 14.0),
+                  hintText: 'Masukkan Kata Sandi',
+                  hintStyle: GoogleFonts.inter(fontSize: 14.0, color: Colors.grey[500]),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: BorderSide(color: Colors.grey.shade400),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: BorderSide(color: primaryColor, width: 2.0),
+                  ),
+                  
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                      color: Colors.grey[600],
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24.0),
+              // Tombol MASUK
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0), 
+                    ),
+                    backgroundColor: primaryColor,
+                    foregroundColor: Colors.white,   
+                  ),
+                  onPressed: () {
+                  },
+                  child: Text(
+                    'MASUK',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 16.0, fontWeight: FontWeight.bold, letterSpacing: 1.0),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

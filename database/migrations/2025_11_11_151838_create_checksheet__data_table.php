@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('checksheet__data', function (Blueprint $table) {
             $table->id('data_id')->primary();
             $table->foreignId('master_id')->constrained('checksheet__masters', 'master_id')->cascadeOnDelete();
-            $table->string('nama_shhet', 50);
+            $table->string('nama_sheet', 50);
             $table->string('nomor_gerbong',50);
             $table->string('item_pemeriksaan');
             $table->string('standar', 100);

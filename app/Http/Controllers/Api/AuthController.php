@@ -41,9 +41,47 @@ class AuthController extends Controller
         $token->delete();
         return response()->json([
             'status' => 'success',
-            'message' => 'Anda telah berhasil sukses.'
+            'message' => 'Anda telah berhasil logout.'
         ]);
     }
         
+    public function APIChangePassword (Request $request){
+       $passwordData = $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:8',
+            'new_password_confirmation' => 'required|string'
+       ]);
+       $user = User::where('nipp', $request->user()->nipp)->first();
+       if(!$user || !Hash::check($passwordData['current_password'], $user->password_hash)){
+            return response()->json([
+                'status' => 'error',
+                'message' => 'password lama tidak sesuai',
+                'errors' => 'current_password'
+            ],422);
+       }
+       //cek password lama
+       if($passwordData['new_password'] != $passwordData['new_password_confirmation']){
+            return response()->json([
+                'status' => 'error',
+                'message' => 'password baru tidak sesuai',
+                'errors' => 'new_password'
+            ],422);
+       }
+       //cegah password baru sama dengan password lama
+        if (Hash::check($passwordData['new_password'], $user->password_hash)) {
+             return response()->json([
+                'status'  => 'error',
+                'message' => 'Password baru tidak boleh sama dengan password lama',
+                'errors'  => 'new_password'
+             ],422);
+        }  
+        $user->password_hash = Hash::make($passwordData['new_password']);
+        $user->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'password berhasil diperbarui'
+        ],200);
+    }
     
 }

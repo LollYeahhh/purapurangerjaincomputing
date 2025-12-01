@@ -21,7 +21,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _nippController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  /// Dummy credentials untuk simulasi (ganti dengan API call di production)
+  /// Dummy credentials untuk simulasi
   final String _validNipp = "123456";
   final String _validPassword = "password123";
   final bool _isFirstLogin = true;

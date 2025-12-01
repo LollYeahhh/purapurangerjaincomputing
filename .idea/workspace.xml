@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="4510046f-3cba-4a79-b8a9-f909a4015d05" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/frontend/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/main.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/pages/dashboard_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/pages/dashboard_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/pages/electric_form_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/pages/electric_form_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/pages/electric_matrix_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/pages/electric_matrix_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/pages/log_form_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/pages/log_form_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/pages/log_list_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/pages/log_list_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/pages/login_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/pages/login_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/pages/mechanic_form_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/pages/mechanic_form_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/pages/mechanic_matrix_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/pages/mechanic_matrix_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/pages/tool_box_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/pages/tool_box_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/pages/tool_kit_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/pages/tool_kit_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/services/dummy_api_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/services/dummy_api_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/services/log_provider.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/services/log_provider.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/widget/dashboard_menu_item.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/widget/dashboard_menu_item.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pubspec.yaml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 7
+}]]></component>
+  <component name="ProjectId" id="36FUzKXfRJsDOCphVjq04tXWgCP" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "dart.analysis.tool.window.visible": "false",
+    "git-widget-placeholder": "feature/ui-mekanik",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/SEMESTER 7/COMPUTING PROJECT/File Program/cp_kaichecksheet",
+    "settings.editor.selected.configurable": "dart.settings",
+    "show.migrate.to.gradle.popup": "false"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="4510046f-3cba-4a79-b8a9-f909a4015d05" name="Changes" comment="" />
+      <created>1764602074028</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1764602074028</updated>
+    </task>
+    <servers />
+  </component>
+</project>

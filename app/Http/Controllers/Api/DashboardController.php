@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 class DashboardController extends Controller
 {
     public function jadwal(Request $request){
-        $user = "Cobaa1234";
+        $user = "Cobaa12345";
 
     }
 }

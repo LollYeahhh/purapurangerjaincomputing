@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'error_page.dart';
-import 'success_page.dart';
 
 /// ChangePasswordPage - Halaman untuk mengganti password pertama kali
 class ChangePasswordPage extends StatefulWidget {
@@ -22,6 +20,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   final TextEditingController _newCtrl = TextEditingController();
   final TextEditingController _confirmCtrl = TextEditingController();
 
+  /// State untuk pesan error
+  String? _errorMessage;
+
   @override
   void dispose() {
     _currentCtrl.dispose();
@@ -33,95 +34,71 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Ganti Password',
+          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
+        ),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+      ),
       backgroundColor: Colors.white,
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              /// Logo perusahaan di atas form
-              Center(
-                child: Image.asset('assets/logo_warna.png', height: 120.0),
-              ),
-              const SizedBox(height: 60.0),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            /// Input Kata Sandi Saat Ini
+            _buildPasswordField(
+              controller: _currentCtrl,
+              label: 'Kata Sandi Saat Ini',
+              hint: 'Masukkan Kata Sandi Saat Ini',
+              obscureText: _obscureCurrent,
+              onToggle:
+                  () => setState(() => _obscureCurrent = !_obscureCurrent),
+            ),
+            const SizedBox(height: 16.0),
 
-              /// Label Kata Sandi Saat Ini
-              Text(
-                'Kata Sandi Saat Ini',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 8.0),
+            /// Input Kata Sandi Baru
+            _buildPasswordField(
+              controller: _newCtrl,
+              label: 'Kata Sandi Baru',
+              hint: 'Masukkan Kata Sandi Baru',
+              obscureText: _obscureNew,
+              onToggle: () => setState(() => _obscureNew = !_obscureNew),
+            ),
+            const SizedBox(height: 16.0),
 
-              /// Input Kata Sandi Saat Ini
-              _buildPasswordField(
-                controller: _currentCtrl,
-                hint: 'Masukkan Kata Sandi Saat Ini',
-                obscureText: _obscureCurrent,
-                onToggle:
-                    () => setState(() => _obscureCurrent = !_obscureCurrent),
-              ),
-              const SizedBox(height: 24.0),
+            /// Input Konfirmasi Kata Sandi Baru
+            _buildPasswordField(
+              controller: _confirmCtrl,
+              label: 'Konfirmasi Kata Sandi',
+              hint: 'Konfirmasi Kata Sandi Baru',
+              obscureText: _obscureConfirm,
+              onToggle:
+                  () => setState(() => _obscureConfirm = !_obscureConfirm),
+            ),
 
-              /// Label Kata Sandi Baru
-              Text(
-                'Kata Sandi Baru',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 8.0),
-
-              /// Input Kata Sandi Baru
-              _buildPasswordField(
-                controller: _newCtrl,
-                hint: 'Masukkan Kata Sandi Baru',
-                obscureText: _obscureNew,
-                onToggle: () => setState(() => _obscureNew = !_obscureNew),
-              ),
-              const SizedBox(height: 24.0),
-
-              /// Label Konfirmasi Kata Sandi
-              Text(
-                'Konfirmasi Kata Sandi',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 8.0),
-
-              /// Input Konfirmasi Kata Sandi
-              _buildPasswordField(
-                controller: _confirmCtrl,
-                hint: 'Konfirmasi Kata Sandi',
-                obscureText: _obscureConfirm,
-                onToggle:
-                    () => setState(() => _obscureConfirm = !_obscureConfirm),
-              ),
-
-              const SizedBox(height: 32.0),
-
-              /// Tombol submit perubahan password
-              _buildSubmitButton(),
+            /// Pesan error jika validasi gagal
+            if (_errorMessage != null) ...[
+              const SizedBox(height: 16.0),
+              _buildErrorMessage(),
             ],
-          ),
+
+            const SizedBox(height: 24.0),
+
+            /// Tombol submit perubahan password
+            _buildSubmitButton(),
+          ],
         ),
       ),
     );
   }
 
-  /// Widget reusable untuk password field dengan rounded border
+  /// Widget reusable untuk password field
   Widget _buildPasswordField({
     required TextEditingController controller,
+    required String label,
     required String hint,
     required bool obscureText,
     required VoidCallback onToggle,
@@ -131,34 +108,31 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       style: GoogleFonts.inter(fontSize: 16.0),
       obscureText: obscureText,
       decoration: InputDecoration(
+        labelText: label,
+        labelStyle: GoogleFonts.inter(fontSize: 14.0),
         hintText: hint,
-        hintStyle: GoogleFonts.inter(fontSize: 14.0, color: Colors.grey[400]),
+        hintStyle: GoogleFonts.inter(fontSize: 14.0, color: Colors.grey[500]),
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 20.0,
-          vertical: 16.0,
+          horizontal: 16.0,
+          vertical: 12.0,
         ),
-        filled: true,
-        fillColor: Colors.white,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30.0),
-          borderSide: BorderSide(color: Colors.grey.shade300),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30.0),
-          borderSide: BorderSide(color: Colors.grey.shade300, width: 1.5),
+          borderRadius: BorderRadius.circular(8.0),
+          borderSide: BorderSide(color: Colors.grey.shade400),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30.0),
+          borderRadius: BorderRadius.circular(8.0),
           borderSide: const BorderSide(color: Color(0xFF2C2A6B), width: 2.0),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30.0),
+          borderRadius: BorderRadius.circular(8.0),
           borderSide: const BorderSide(color: Colors.red, width: 1.5),
         ),
         suffixIcon: IconButton(
           icon: Icon(
             obscureText ? Icons.visibility_off : Icons.visibility,
-            color: Colors.grey[500],
+            color: Colors.grey[600],
             size: 20.0,
           ),
           onPressed: onToggle,
@@ -169,27 +143,53 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     );
   }
 
+  /// Widget untuk menampilkan pesan error
+  Widget _buildErrorMessage() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+      decoration: BoxDecoration(
+        color: Colors.red.shade50,
+        borderRadius: BorderRadius.circular(8.0),
+        border: Border.all(color: Colors.red.shade200),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.error_outline, color: Colors.red.shade700, size: 18.0),
+          const SizedBox(width: 8.0),
+          Expanded(
+            child: Text(
+              _errorMessage!,
+              style: GoogleFonts.inter(
+                fontSize: 13.0,
+                color: Colors.red.shade700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   /// Widget untuk tombol submit
   Widget _buildSubmitButton() {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 18.0),
+          padding: const EdgeInsets.symmetric(vertical: 16.0),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30.0),
+            borderRadius: BorderRadius.circular(8.0),
           ),
           backgroundColor: const Color(0xFF2C2A6B),
           foregroundColor: Colors.white,
-          elevation: 0,
         ),
         onPressed: _handleChangePassword,
         child: Text(
-          'MASUK',
-          style: GoogleFonts.inter(
+          'SIMPAN',
+          style: GoogleFonts.plusJakartaSans(
             fontSize: 16.0,
             fontWeight: FontWeight.bold,
-            letterSpacing: 1.2,
+            letterSpacing: 1.0,
           ),
         ),
       ),
@@ -198,41 +198,88 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
   /// Fungsi handler untuk validasi dan submit perubahan password
   void _handleChangePassword() {
+    setState(() {
+      _errorMessage = null; // Reset error message
+    });
+
     final current = _currentCtrl.text.trim();
     final newPass = _newCtrl.text.trim();
     final confirm = _confirmCtrl.text.trim();
 
     // Validasi input kosong
     if (current.isEmpty || newPass.isEmpty || confirm.isEmpty) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const ErrorPage()),
-      );
+      setState(() {
+        _errorMessage = 'Semua field harus diisi';
+      });
       return;
     }
 
     // Validasi password baru minimal 6 karakter
     if (newPass.length < 6) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const ErrorPage()),
-      );
+      setState(() {
+        _errorMessage = 'Password baru minimal 6 karakter';
+      });
       return;
     }
 
     // Validasi konfirmasi password cocok
     if (newPass != confirm) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const ErrorPage()),
-      );
+      setState(() {
+        _errorMessage = 'Konfirmasi password tidak cocok';
+      });
       return;
     }
 
-    // Jika semua validasi lolos, navigasi ke halaman sukses
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const SuccessPage()),
+    // Jika semua validasi lolos, kirim ke server (ganti dengan API call)
+    // Simulasi sukses
+    _showSuccessDialog();
+  }
+
+  /// Fungsi untuk menampilkan dialog sukses
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12.0),
+            ),
+            title: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.green, size: 28.0),
+                const SizedBox(width: 12.0),
+                Text(
+                  'Berhasil',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            content: Text(
+              'Password berhasil diubah. Silakan login kembali.',
+              style: GoogleFonts.inter(fontSize: 14.0),
+            ),
+            actions: [
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2C2A6B),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+                onPressed: () {
+                  // Kembali ke halaman login
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
+                child: Text(
+                  'OK',
+                  style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
     );
   }
 }

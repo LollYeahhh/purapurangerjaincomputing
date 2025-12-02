@@ -4,23 +4,7 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4510046f-3cba-4a79-b8a9-f909a4015d05" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/frontend/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/main.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/lib/pages/dashboard_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/pages/dashboard_page.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/lib/pages/electric_form_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/pages/electric_form_page.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/lib/pages/electric_matrix_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/pages/electric_matrix_page.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/lib/pages/log_form_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/pages/log_form_page.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/lib/pages/log_list_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/pages/log_list_page.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/lib/pages/login_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/pages/login_page.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/lib/pages/mechanic_form_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/pages/mechanic_form_page.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/lib/pages/mechanic_matrix_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/pages/mechanic_matrix_page.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/lib/pages/tool_box_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/pages/tool_box_page.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/lib/pages/tool_kit_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/pages/tool_kit_page.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/lib/services/dummy_api_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/services/dummy_api_service.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/lib/services/log_provider.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/services/log_provider.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/lib/widget/dashboard_menu_item.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/widget/dashboard_menu_item.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pubspec.yaml" afterDir="false" />
-    </list>
+    <list default="true" id="4510046f-3cba-4a79-b8a9-f909a4015d05" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

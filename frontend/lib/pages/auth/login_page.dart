@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../models/user_model.dart';
+import '../../services/auth_service.dart';
 import 'change_password_page.dart';
+import '../mekanik/mekanik_home_page.dart';
+import '../pengawas/pengawas_home_page.dart';
 
-/// LoginPage - Halaman utama untuk autentikasi pengguna
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
 
@@ -11,20 +14,12 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  /// State untuk mengatur visibilitas kata sandi
   bool _obscurePassword = true;
-
-  /// State untuk menampilkan pesan error
   String? _errorMessage;
+  bool _isLoading = false;
 
-  /// Controllers untuk mengambil nilai input
   final TextEditingController _nippController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
-  /// Dummy credentials untuk simulasi (ganti dengan API call di production)
-  final String _validNipp = "123456";
-  final String _validPassword = "password123";
-  final bool _isFirstLogin = true; // Flag untuk cek login pertama kali
 
   @override
   void dispose() {
@@ -44,13 +39,11 @@ class _LoginPageState extends State<LoginPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /// Logo perusahaan di atas form login
               Center(
                 child: Image.asset('assets/logo_warna.png', height: 120.0),
               ),
               const SizedBox(height: 60.0),
 
-              /// Label NIPP
               Text(
                 'NIPP',
                 style: GoogleFonts.plusJakartaSans(
@@ -60,13 +53,9 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               const SizedBox(height: 8.0),
-
-              /// Input field untuk NIPP
               _buildNippTextField(),
-
               const SizedBox(height: 24.0),
 
-              /// Label Kata Sandi
               Text(
                 'Kata Sandi',
                 style: GoogleFonts.plusJakartaSans(
@@ -76,19 +65,14 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               const SizedBox(height: 8.0),
-
-              /// Input field untuk Kata Sandi
               _buildPasswordTextField(),
 
-              /// Pesan error jika login gagal
               if (_errorMessage != null) ...[
                 const SizedBox(height: 8.0),
                 _buildErrorMessage(),
               ],
 
               const SizedBox(height: 32.0),
-
-              /// Tombol MASUK
               _buildLoginButton(),
             ],
           ),
@@ -97,11 +81,11 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  /// Widget untuk TextField NIPP
   Widget _buildNippTextField() {
     return TextFormField(
       controller: _nippController,
       style: GoogleFonts.inter(fontSize: 16.0),
+      enabled: !_isLoading,
       decoration: InputDecoration(
         hintText: 'Masukkan NIPP',
         hintStyle: GoogleFonts.inter(fontSize: 14.0, color: Colors.grey[400]),
@@ -123,21 +107,21 @@ class _LoginPageState extends State<LoginPage> {
           borderRadius: BorderRadius.circular(30.0),
           borderSide: const BorderSide(color: Color(0xFF2C2A6B), width: 2.0),
         ),
-        errorBorder: OutlineInputBorder(
+        disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(30.0),
-          borderSide: const BorderSide(color: Colors.red, width: 1.5),
+          borderSide: BorderSide(color: Colors.grey.shade200, width: 1.5),
         ),
       ),
       keyboardType: TextInputType.number,
     );
   }
 
-  /// Widget untuk TextField Kata Sandi dengan toggle visibility
   Widget _buildPasswordTextField() {
     return TextFormField(
       controller: _passwordController,
       style: GoogleFonts.inter(fontSize: 16.0),
       obscureText: _obscurePassword,
+      enabled: !_isLoading,
       decoration: InputDecoration(
         hintText: 'Masukkan Kata Sandi',
         hintStyle: GoogleFonts.inter(fontSize: 14.0, color: Colors.grey[400]),
@@ -159,9 +143,9 @@ class _LoginPageState extends State<LoginPage> {
           borderRadius: BorderRadius.circular(30.0),
           borderSide: const BorderSide(color: Color(0xFF2C2A6B), width: 2.0),
         ),
-        errorBorder: OutlineInputBorder(
+        disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(30.0),
-          borderSide: const BorderSide(color: Colors.red, width: 1.5),
+          borderSide: BorderSide(color: Colors.grey.shade200, width: 1.5),
         ),
         suffixIcon: IconButton(
           icon: Icon(
@@ -169,7 +153,7 @@ class _LoginPageState extends State<LoginPage> {
             color: Colors.grey[500],
             size: 20.0,
           ),
-          onPressed: _togglePasswordVisibility,
+          onPressed: _isLoading ? null : _togglePasswordVisibility,
           iconSize: 20.0,
           padding: const EdgeInsets.all(8.0),
         ),
@@ -177,7 +161,6 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  /// Widget untuk menampilkan pesan error
   Widget _buildErrorMessage() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
@@ -204,7 +187,6 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  /// Widget untuk tombol login
   Widget _buildLoginButton() {
     return SizedBox(
       width: double.infinity,
@@ -218,30 +200,38 @@ class _LoginPageState extends State<LoginPage> {
           foregroundColor: Colors.white,
           elevation: 0,
         ),
-        onPressed: _handleLogin,
-        child: Text(
-          'MASUK',
-          style: GoogleFonts.inter(
-            fontSize: 16.0,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.2,
-          ),
-        ),
+        onPressed: _isLoading ? null : _handleLogin,
+        child:
+            _isLoading
+                ? const SizedBox(
+                  height: 20.0,
+                  width: 20.0,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.0,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                )
+                : Text(
+                  'MASUK',
+                  style: GoogleFonts.inter(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2,
+                  ),
+                ),
       ),
     );
   }
 
-  /// Fungsi untuk toggle visibilitas password
   void _togglePasswordVisibility() {
     setState(() {
       _obscurePassword = !_obscurePassword;
     });
   }
 
-  /// Fungsi handler untuk proses login dengan validasi
-  void _handleLogin() {
+  void _handleLogin() async {
     setState(() {
-      _errorMessage = null; // Reset error message
+      _errorMessage = null;
     });
 
     final nipp = _nippController.text.trim();
@@ -255,25 +245,53 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    // Validasi kredensial (ganti dengan API call di production)
-    if (nipp == _validNipp && password == _validPassword) {
-      // Login berhasil - cek apakah login pertama kali
-      if (_isFirstLogin) {
-        // Navigasi ke halaman ganti password
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const ChangePasswordPage()),
-        );
-      } else {
-        // Navigasi ke halaman utama/dashboard
-        // Navigator.pushReplacementNamed(context, '/home');
-        print('Login berhasil - ke dashboard');
-      }
-    } else {
-      // Login gagal - tampilkan error
+    // Show loading
+    setState(() {
+      _isLoading = true;
+    });
+
+    // Call login service
+    final user = await AuthService.login(nipp, password);
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (user == null) {
       setState(() {
         _errorMessage = 'NIPP atau Kata Sandi salah';
       });
+      return;
     }
+
+    // Login berhasil - cek apakah login pertama kali
+    if (user.isFirstLogin) {
+      // Navigasi ke halaman ganti password
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => ChangePasswordPage(user: user)),
+      );
+    } else {
+      // Login bukan pertama kali - arahkan ke dashboard sesuai role
+      _navigateToHomePage(user);
+    }
+  }
+
+  void _navigateToHomePage(User user) {
+    Widget homePage;
+
+    switch (user.role) {
+      case UserRole.mekanik:
+        homePage = MekanikHomePage(user: user);
+        break;
+      case UserRole.pengawas:
+        homePage = PengawasHomePage(user: user);
+        break;
+    }
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => homePage),
+    );
   }
 }

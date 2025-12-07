@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'pages/login_page.dart';
-import 'pages/change_password_page.dart';
-import 'pages/success_page.dart';
-import 'pages/error_page.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'pages/auth/login_page.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('id_ID', null);
+
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -36,8 +38,16 @@ class MyApp extends StatelessWidget {
         textTheme: GoogleFonts.interTextTheme(),
         scaffoldBackgroundColor: Colors.white,
       ),
-
-      /// Rute awal aplikasi dimulai dari LoginPage
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('id', 'ID'), // Bahasa Indonesia
+        Locale('en', 'US'), // English
+      ],
+      locale: const Locale('id', 'ID'),
       home: const LoginPage(),
     );
   }

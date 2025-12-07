@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// SuccessPage - Halaman notifikasi berhasil untuk perubahan password
 class SuccessPage extends StatelessWidget {
-  const SuccessPage({Key? key}) : super(key: key);
+  final String message;
+  final VoidCallback? onBackPressed;
+
+  const SuccessPage({
+    Key? key,
+    this.message = 'Kata Sandi Anda berhasil diperbarui',
+    this.onBackPressed,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +56,7 @@ class SuccessPage extends StatelessWidget {
 
               /// Pesan sukses
               Text(
-                'Kata Sandi Anda berhasil diperbarui',
+                message,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(fontSize: 16.0, color: Colors.black87),
               ),
@@ -65,7 +71,6 @@ class SuccessPage extends StatelessWidget {
     );
   }
 
-  /// Widget untuk tombol kembali
   Widget _buildBackButton(BuildContext context) {
     return SizedBox(
       width: double.infinity,
@@ -80,8 +85,12 @@ class SuccessPage extends StatelessWidget {
           elevation: 0,
         ),
         onPressed: () {
-          // Kembali ke halaman login (halaman pertama)
-          Navigator.of(context).popUntil((route) => route.isFirst);
+          if (onBackPressed != null) {
+            onBackPressed!();
+          } else {
+            // Kembali ke halaman login (halaman pertama)
+            Navigator.of(context).popUntil((route) => route.isFirst);
+          }
         },
         child: Text(
           'KEMBALI',

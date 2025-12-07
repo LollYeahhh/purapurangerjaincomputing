@@ -4,7 +4,16 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4510046f-3cba-4a79-b8a9-f909a4015d05" name="Changes" comment="" />
+    <list default="true" id="4510046f-3cba-4a79-b8a9-f909a4015d05" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/.flutter-plugins-dependencies" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/.flutter-plugins-dependencies" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/main.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/pages/change_password_page.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/pages/error_page.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/pages/login_page.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/pages/success_page.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pubspec.yaml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -16,9 +25,9 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 7
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 7
+}</component>
   <component name="ProjectId" id="36FUzKXfRJsDOCphVjq04tXWgCP" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -32,7 +41,7 @@
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "feature/ui-mekanik",
+    "git-widget-placeholder": "mekanik-pengawas",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "D:/SEMESTER 7/COMPUTING PROJECT/File Program/cp_kaichecksheet",
     "settings.editor.selected.configurable": "dart.settings",

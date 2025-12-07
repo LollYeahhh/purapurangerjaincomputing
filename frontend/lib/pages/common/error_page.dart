@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// ErrorPage - Halaman notifikasi gagal untuk validasi form
 class ErrorPage extends StatelessWidget {
-  const ErrorPage({Key? key}) : super(key: key);
+  final String message;
+  final VoidCallback? onBackPressed;
+
+  const ErrorPage({
+    Key? key,
+    this.message = 'Data yang diberikan tidak valid',
+    this.onBackPressed,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +56,7 @@ class ErrorPage extends StatelessWidget {
 
               /// Pesan error
               Text(
-                'Data yang diberikan tidak valid',
+                message,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(fontSize: 16.0, color: Colors.black87),
               ),
@@ -65,7 +71,6 @@ class ErrorPage extends StatelessWidget {
     );
   }
 
-  /// Widget untuk tombol kembali
   Widget _buildBackButton(BuildContext context) {
     return SizedBox(
       width: double.infinity,
@@ -80,7 +85,11 @@ class ErrorPage extends StatelessWidget {
           elevation: 0,
         ),
         onPressed: () {
-          Navigator.pop(context);
+          if (onBackPressed != null) {
+            onBackPressed!();
+          } else {
+            Navigator.pop(context);
+          }
         },
         child: Text(
           'KEMBALI',

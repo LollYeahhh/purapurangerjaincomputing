@@ -10,27 +10,35 @@ class DashboardController extends Controller
 {
     public function jadwal(Request $request)
     {
-         $assignments = Assignments::orderBy('jam_berangkat', 'asc')->get();
+        // pake nama relasi persis: checksheet
+        $assignments = Assignments::with('checksheet')
+            ->orderBy('jam_berangkat', 'asc')
+            ->get();
 
-        // Jika data kosong
         if ($assignments->count() === 0) {
             return response()->json([
                 'status' => 'success',
-                'data'   => []   // array kosong sesuai dokumentasi
+                'data'   => []
             ], 200);
         }
 
-        // Jika ada data → map ke format response
+        $assignments = Assignments::with('checksheet')
+    ->orderBy('jam_berangkat', 'asc')
+    ->get();
+
         $data = $assignments->map(function ($item) {
-            return [
-                'jadwal_id'      => $item->jadwal_id,
-                'no_ka'          => $item->no_ka,
-                'nama_ka'        => $item->nama_ka,
-                'jam_berangkat'  => $item->jam_berangkat,
-                'status_laporan' => $item->status_laporan,
-                'laporan_id'     => $item->laporan_id, // bisa null
-            ];
-        });
+    $checksheet = $item->checksheet;
+
+    return [
+        'jadwal_id'      => $item->jadwal_id,
+        'no_ka'          => $item->no_ka,
+        'nama_ka'        => $item->nama_ka,
+        'jam_berangkat'  => $item->jam_berangkat,
+        'status_laporan' => $checksheet ? $checksheet->status    : null,
+        'laporan_id'     => $checksheet ? $checksheet->master_id : null,
+    ];
+});
+
 
         return response()->json([
             'status' => 'success',

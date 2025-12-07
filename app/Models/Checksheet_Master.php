@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Checksheet_Master extends Model
 {
-    protected $table = "checksheet_masters";
+    protected $table = "checksheet__masters"; // DOUBLE underscore
     protected $primaryKey = "master_id";
     public $incrementing = true;
-    public $timestamp = false;
+    public $timestamps = false;
+
     protected $fillable = [
         'master_id',
         'no_ka',

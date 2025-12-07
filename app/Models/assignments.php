@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Checksheet_Master;
 
 class Assignments extends Model
 {
@@ -16,6 +17,12 @@ class Assignments extends Model
         'user_id',
         'no_ka',
         'nama_ka',
-        'jam_berangkat'
+        'jam_berangkat',
     ];
+
+    // NAMA RELASI: checksheet (huruf kecil semua)
+    public function checksheet()
+    {
+        return $this->hasOne(\App\Models\Checksheet_Master::class, 'no_ka', 'no_ka');
+    }
 }

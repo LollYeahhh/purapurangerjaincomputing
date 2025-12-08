@@ -28,7 +28,13 @@ class _ChecksheetInventarisPageState extends State<ChecksheetInventarisPage> {
   bool _isLoading = false;
   String _currentSheet = 'Tool Box';
 
-  // ✅ List of available sheets
+  //Controller dan status panah
+  final ScrollController _scrollController = ScrollController();
+  bool _showLeftArrow = false;
+  bool _showRightArrow = false;
+  double _scrollProgress = 0.0;
+
+  //List of available sheets
   final List<Map<String, dynamic>> _sheets = [
     {'name': 'Tool Box', 'icon': Icons.construction},
     {'name': 'Tool Kit', 'icon': Icons.build},
@@ -45,6 +51,55 @@ class _ChecksheetInventarisPageState extends State<ChecksheetInventarisPage> {
   void initState() {
     super.initState();
     _initializeToolBoxItems();
+
+    // DITAMBAHKAN: Setup scroll listener
+    _scrollController.addListener(_updateScrollArrows); // ✅ DIUBAH
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateScrollArrows();
+    });
+  }
+
+  @override
+  void dispose() {
+    // DITAMBAHKAN: Cleanup
+    _scrollController.removeListener(_updateScrollArrows);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _updateScrollArrows() {
+    if (!mounted || !_scrollController.hasClients) return;
+
+    final double maxScroll = _scrollController.position.maxScrollExtent;
+    final double currentScroll = _scrollController.offset;
+
+    setState(() {
+      _showLeftArrow = currentScroll > 0;
+      _showRightArrow = currentScroll < maxScroll;
+
+      // Hitung progress scroll (0.0 - 1.0)
+      if (maxScroll > 0) {
+        _scrollProgress = (currentScroll / maxScroll).clamp(0.0, 1.0);
+      } else {
+        _scrollProgress = 0.0;
+      }
+    });
+  }
+
+  void _scrollTabsBy(double offset) {
+    if (!_scrollController.hasClients) return;
+
+    final position = _scrollController.position;
+    final target = (position.pixels + offset).clamp(
+      0.0,
+      position.maxScrollExtent,
+    );
+
+    _scrollController.animateTo(
+      target,
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeOut,
+    );
   }
 
   void _initializeToolBoxItems() {
@@ -344,84 +399,226 @@ class _ChecksheetInventarisPageState extends State<ChecksheetInventarisPage> {
     );
   }
 
-  // ✅ 3. Horizontal Sheet Tabs (Draggable)
+  //Horizontal Sheet Tabs
   Widget _buildSheetTabs() {
     return Container(
-      height: 70.0, // ✅ Tinggi yang cukup
       margin: const EdgeInsets.only(bottom: 12.0),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        itemCount: _sheets.length,
-        itemBuilder: (context, index) {
-          final sheet = _sheets[index];
-          final isSelected = _currentSheet == sheet['name'];
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          bottom: BorderSide(color: Colors.grey.shade200, width: 1.0),
+        ),
+      ),
+      child: Column(
+        children: [
+          // Tabs dengan panah
+          SizedBox(
+            height: 50.0, // ?. Tambah tinggi untuk spacing
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (notification) {
+                if (notification is ScrollUpdateNotification ||
+                    notification is OverscrollNotification ||
+                    notification is ScrollEndNotification) {
+                  _updateScrollArrows();
+                }
+                return false;
+              },
+              child: ListView.builder(
+                controller: _scrollController,
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 4.0,
+                ), // ?. Tambah vertical padding
+                itemCount: _sheets.length,
+                itemBuilder: (context, index) {
+                  final sheet = _sheets[index];
+                  final isSelected = _currentSheet == sheet['name'];
 
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                _currentSheet = sheet['name'];
-              });
-            },
-            child: Container(
-              margin: const EdgeInsets.only(right: 12.0),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
-                vertical: 8.0,
-              ),
-              constraints: const BoxConstraints(
-                minWidth: 80.0, // ✅ Lebar minimum
-                maxWidth: 120.0, // ✅ Lebar maksimum
-              ),
-              decoration: BoxDecoration(
-                color: isSelected ? const Color(0xFF2196F3) : Colors.white,
-                borderRadius: BorderRadius.circular(12.0),
-                border: Border.all(
-                  color:
-                      isSelected
-                          ? const Color(0xFF2196F3)
-                          : Colors.grey.shade300,
-                  width: isSelected ? 2.0 : 1.0,
-                ),
-                boxShadow:
-                    isSelected
-                        ? [
-                          BoxShadow(
-                            color: const Color(0xFF2196F3).withOpacity(0.3),
-                            blurRadius: 8.0,
-                            offset: const Offset(0, 2),
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _currentSheet = sheet['name'];
+                      });
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(right: 8.0),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12.0,
+                        vertical: 8.0,
+                      ),
+                      constraints: const BoxConstraints(minWidth: 110.0),
+                      decoration: BoxDecoration(
+                        color:
+                            isSelected
+                                ? const Color(0xFF2196F3)
+                                : Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(
+                            sheet['icon'],
+                            size: 18.0,
+                            color: isSelected ? Colors.white : Colors.grey[700],
                           ),
-                        ]
-                        : null,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min, // ✅ Penting
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    sheet['icon'],
-                    size: 22.0,
-                    color: isSelected ? Colors.white : Colors.grey[700],
-                  ),
-                  const SizedBox(height: 4.0),
-                  Text(
-                    sheet['name'],
-                    style: GoogleFonts.inter(
-                      fontSize: 11.0,
-                      fontWeight:
-                          isSelected ? FontWeight.w700 : FontWeight.w600,
-                      color: isSelected ? Colors.white : Colors.grey[700],
+                          const SizedBox(width: 6.0),
+                          Text(
+                            sheet['name'],
+                            style: GoogleFonts.inter(
+                              fontSize: 12.0,
+                              fontWeight:
+                                  isSelected
+                                      ? FontWeight.w700
+                                      : FontWeight.w600,
+                              color:
+                                  isSelected ? Colors.white : Colors.grey[700],
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
                     ),
-                    textAlign: TextAlign.center,
-                    maxLines: 1, // ✅ Batasi 1 baris
-                    overflow:
-                        TextOverflow.ellipsis, // ✅ Potong jika terlalu panjang
-                  ),
-                ],
+                  );
+                },
               ),
             ),
-          );
-        },
+          ),
+
+          // ?. Scroll Indicator (Spacing + Design seperti gambar)
+          const SizedBox(height: 1.0), // ?. Spacing antara tabs dan indicator
+          _buildScrollIndicator(),
+        ],
+      ),
+    );
+  }
+
+  //Scroll Indicator dengan design seperti gambar referensi
+  Widget _buildScrollIndicator() {
+    if (!_scrollController.hasClients) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Row(
+          children: [
+            _buildIndicatorArrow(isLeft: true, enabled: false, onTap: () {}),
+            const SizedBox(width: 8.0),
+            Expanded(
+              child: Container(
+                height: 6.0,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8.0),
+            _buildIndicatorArrow(isLeft: false, enabled: false, onTap: () {}),
+          ],
+        ),
+      );
+    }
+
+    final double maxScroll = _scrollController.position.maxScrollExtent;
+
+    if (maxScroll <= 0) {
+      return const SizedBox.shrink();
+    }
+
+    final double viewportWidth = _scrollController.position.viewportDimension;
+    final double totalContentWidth = maxScroll + viewportWidth;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Row(
+        children: [
+          _buildIndicatorArrow(
+            isLeft: true,
+            enabled: _showLeftArrow,
+            onTap: () => _scrollTabsBy(-viewportWidth * 0.8),
+          ),
+          const SizedBox(width: 8.0),
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final double trackWidth = constraints.maxWidth;
+                final double indicatorWidth =
+                    ((viewportWidth / totalContentWidth) * trackWidth).clamp(
+                      32.0,
+                      trackWidth,
+                    );
+                final double scrollRatio = _scrollProgress;
+                final double maxIndicatorPosition = trackWidth - indicatorWidth;
+                final double indicatorLeft = (maxIndicatorPosition *
+                        scrollRatio)
+                    .clamp(0.0, maxIndicatorPosition);
+
+                return SizedBox(
+                  height: 12.0,
+                  child: Stack(
+                    alignment: Alignment.centerLeft,
+                    children: [
+                      Container(
+                        height: 6.0,
+                        decoration: BoxDecoration(
+                          color: const Color.fromARGB(255, 255, 255, 255),
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                      ),
+                      Positioned(
+                        left: indicatorLeft,
+                        child: Container(
+                          height: 5.0,
+                          width: indicatorWidth,
+                          decoration: BoxDecoration(
+                            color: const Color(0xABAAC4),
+                            borderRadius: BorderRadius.circular(12.0),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xABAAC4).withOpacity(0.25),
+                                blurRadius: 0.0,
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(width: 8.0),
+          _buildIndicatorArrow(
+            isLeft: false,
+            enabled: _showRightArrow,
+            onTap: () => _scrollTabsBy(viewportWidth * 0.8),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildIndicatorArrow({
+    required bool isLeft,
+    required bool enabled,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: enabled ? onTap : null,
+      borderRadius: BorderRadius.circular(
+        4.0,
+      ), // ✅ Radius kecil untuk ripple effect
+      child: Padding(
+        padding: const EdgeInsets.all(4.0), // ✅ Padding untuk area tap
+        child: Icon(
+          isLeft ? Icons.chevron_left : Icons.chevron_right,
+          size: 20.0, // ✅ Ukuran diperbesar karena tidak ada lingkaran
+          color: enabled ? const Color(0xFF7B83EB) : Colors.grey.shade400,
+        ),
       ),
     );
   }

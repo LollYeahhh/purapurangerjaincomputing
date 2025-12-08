@@ -4,6 +4,8 @@ class LaporanPendingModel {
   final String namaKa;
   final String namaMekanik;
   final DateTime submittedAt;
+  final String pdfUrl;
+  final String status;
 
   LaporanPendingModel({
     required this.laporanId,
@@ -11,6 +13,8 @@ class LaporanPendingModel {
     required this.namaKa,
     required this.namaMekanik,
     required this.submittedAt,
+    required this.pdfUrl,
+    required this.status,
   });
 
   factory LaporanPendingModel.fromJson(Map<String, dynamic> json) {
@@ -20,6 +24,8 @@ class LaporanPendingModel {
       namaKa: json['nama_ka'],
       namaMekanik: json['nama_mekanik'],
       submittedAt: DateTime.parse(json['submitted_at']),
+      pdfUrl: json['pdf_url'] ?? '',
+      status: json['status'] ?? 'approved',
     );
   }
 }
@@ -31,6 +37,7 @@ class LaporanApprovedModel {
   final String namaMekanik;
   final DateTime approvedAt;
   final String pdfUrl;
+  final String status;
 
   LaporanApprovedModel({
     required this.laporanId,
@@ -39,6 +46,7 @@ class LaporanApprovedModel {
     required this.namaMekanik,
     required this.approvedAt,
     required this.pdfUrl,
+    required this.status,
   });
 
   factory LaporanApprovedModel.fromJson(Map<String, dynamic> json) {
@@ -49,6 +57,7 @@ class LaporanApprovedModel {
       namaMekanik: json['nama_mekanik'],
       approvedAt: DateTime.parse(json['approved_at']),
       pdfUrl: json['pdf_url'],
+      status: json['status'] ?? 'approved',
     );
   }
 }

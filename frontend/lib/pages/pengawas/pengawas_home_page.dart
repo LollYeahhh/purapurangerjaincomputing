@@ -662,13 +662,22 @@ class _PengawasHomePageState extends State<PengawasHomePage>
   }
 
   Widget _buildApprovedCard(LaporanApprovedModel laporan) {
+    // ✅ Tentukan warna dan text berdasarkan status
+    final bool isRejected = laporan.status == 'rejected';
+    final Color statusColor =
+        isRejected ? const Color(0xFFF44336) : const Color(0xFF4CAF50);
+    final String statusText = isRejected ? 'Ditolak' : 'Disetujui';
+    final IconData statusIcon = isRejected ? Icons.cancel : Icons.check_circle;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16.0),
       padding: const EdgeInsets.all(20.0),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16.0),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(
+          color: isRejected ? Colors.red.shade100 : Colors.grey.shade200,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),
@@ -738,11 +747,40 @@ class _PengawasHomePageState extends State<PengawasHomePage>
           ),
           const SizedBox(height: 16.0),
 
-          // DIPINDAHKAN: Garis pemisah ke atas
           Divider(color: Colors.grey.shade300, thickness: 1.0, height: 1.0),
           const SizedBox(height: 16.0),
 
-          // DIUBAH: Row untuk menyejajarkan waktu dengan tombol
+          // ✅ Status Badge
+          Row(
+            children: [
+              Icon(statusIcon, size: 16.0, color: statusColor),
+              const SizedBox(width: 6.0),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10.0,
+                  vertical: 4.0,
+                ),
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12.0),
+                  border: Border.all(
+                    color: statusColor.withOpacity(0.3),
+                    width: 1.0,
+                  ),
+                ),
+                child: Text(
+                  statusText,
+                  style: GoogleFonts.inter(
+                    fontSize: 11.0,
+                    fontWeight: FontWeight.w700,
+                    color: statusColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12.0),
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -765,7 +803,9 @@ class _PengawasHomePageState extends State<PengawasHomePage>
                             color: Colors.grey[600],
                           ),
                           children: [
-                            TextSpan(text: 'Disetujui: '),
+                            TextSpan(
+                              text: isRejected ? 'Ditolak: ' : 'Disetujui: ',
+                            ),
                             TextSpan(
                               text: DateFormat(
                                 'd MMM yyyy, HH.mm',
@@ -788,13 +828,17 @@ class _PengawasHomePageState extends State<PengawasHomePage>
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Membuka PDF: ${laporan.pdfUrl}'),
-                      backgroundColor: const Color(0xFF4CAF50),
+                      content: Text(
+                        isRejected
+                            ? 'Melihat alasan penolakan ${laporan.noKa}'
+                            : 'Membuka PDF: ${laporan.pdfUrl}',
+                      ),
+                      backgroundColor: statusColor,
                     ),
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4CAF50),
+                  backgroundColor: statusColor,
                   foregroundColor: Colors.white,
                   minimumSize: const Size(100, 40),
                   padding: const EdgeInsets.symmetric(
@@ -810,16 +854,12 @@ class _PengawasHomePageState extends State<PengawasHomePage>
                     Set<MaterialState> states,
                   ) {
                     if (states.contains(MaterialState.hovered)) {
-                      return Color.lerp(
-                        const Color(0xFF4CAF50),
-                        Colors.white,
-                        0.2,
-                      )!;
+                      return Color.lerp(statusColor, Colors.white, 0.2)!;
                     }
                     if (states.contains(MaterialState.pressed)) {
-                      return const Color(0xFF4CAF50).withOpacity(0.7);
+                      return statusColor.withOpacity(0.7);
                     }
-                    return const Color(0xFF4CAF50);
+                    return statusColor;
                   }),
                   elevation: MaterialStateProperty.resolveWith<double>((
                     Set<MaterialState> states,
@@ -831,7 +871,7 @@ class _PengawasHomePageState extends State<PengawasHomePage>
                   }),
                 ),
                 child: Text(
-                  'Detail & PDF',
+                  isRejected ? 'Lihat Detail' : 'Detail & PDF',
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 13.0,
                     fontWeight: FontWeight.w700,

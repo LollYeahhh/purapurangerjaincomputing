@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'checksheet_inventaris_page.dart';
 import '../../models/user_model.dart';
 import '../../models/jadwal_model.dart';
 import '../../services/api_service.dart';
@@ -665,12 +666,27 @@ class _MekanikHomePageState extends State<MekanikHomePage> {
   }
 
   void _handleJadwalAction(JadwalModel jadwal) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Membuka ${jadwal.noKa} - ${jadwal.namaKa}'),
-        backgroundColor: const Color(0xFF2C2A6B),
-      ),
-    );
+    if (jadwal.statusLaporan.toLowerCase() == 'baru') {
+      // Navigasi ke checksheet
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder:
+              (context) => ChecksheetInventarisPage(
+                user: widget.user,
+                jadwal: jadwal,
+                laporanId: jadwal.laporanId ?? 0, // ID dari API cek-atau-buat
+              ),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Membuka ${jadwal.noKa} - ${jadwal.namaKa}'),
+          backgroundColor: const Color(0xFF2C2A6B),
+        ),
+      );
+    }
   }
 
   void _handleLogout(BuildContext context) {

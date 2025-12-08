@@ -108,10 +108,8 @@ class ApiService {
 
   /// ✅ SIMULASI: GET Dashboard Pengawas (Dummy Data)
   static Future<Map<String, dynamic>> getDashboardPengawas(String token) async {
-    // Simulasi delay network
     await Future.delayed(const Duration(seconds: 1));
 
-    // ✅ DUMMY DATA untuk simulasi
     final Map<String, dynamic> dummyPengawasData = {
       'pending_approval': [
         {
@@ -119,40 +117,61 @@ class ApiService {
           'no_ka': 'KA 233',
           'nama_ka': 'Probowangi',
           'nama_mekanik': 'Gilang Yanuar',
-          'submitted_at': '2025-12-03T10:30:00Z',
+          'submitted_at': '2025-12-08T10:30:00Z',
         },
         {
           'laporan_id': 47,
           'no_ka': 'KA 10',
           'nama_ka': 'Bima',
           'nama_mekanik': 'Ahmad Rizki',
-          'submitted_at': '2025-12-03T09:00:00Z',
+          'submitted_at': '2025-12-08T09:00:00Z',
         },
       ],
       'riwayat_approved': [
+        {
+          'laporan_id': 50,
+          'no_ka': 'KA 108',
+          'nama_ka': 'Taksaka',
+          'nama_mekanik': 'Ahmad Rizki',
+          'approved_at': '2025-12-07T16:30:00Z',
+          'pdf_url': 'https://example.com/laporan/50.pdf',
+          'status': 'rejected', // ✅ Status ditolak
+        },
         {
           'laporan_id': 48,
           'no_ka': 'KA 7048',
           'nama_ka': 'Gajayana',
           'nama_mekanik': 'Gilang Yanuar',
-          'approved_at': '2025-12-02T15:30:00Z',
+          'approved_at': '2025-12-06T15:30:00Z',
           'pdf_url': 'https://example.com/laporan/48.pdf',
+          'status': 'approved', // ✅ Status disetujui
+        },
+        {
+          'laporan_id': 49,
+          'no_ka': 'KA 0301',
+          'nama_ka': 'Joglosemarkerto',
+          'nama_mekanik': 'Budi Santoso',
+          'approved_at': '2025-12-05T14:20:00Z',
+          'pdf_url': 'https://example.com/laporan/49.pdf',
+          'status': 'rejected', // ✅ Status ditolak
         },
         {
           'laporan_id': 44,
           'no_ka': 'KA 120',
           'nama_ka': 'Argo Bromo Anggrek',
           'nama_mekanik': 'Ahmad Rizki',
-          'approved_at': '2025-12-01T14:20:00Z',
+          'approved_at': '2025-12-04T14:20:00Z',
           'pdf_url': 'https://example.com/laporan/44.pdf',
+          'status': 'approved',
         },
         {
           'laporan_id': 43,
           'no_ka': 'KA 108',
           'nama_ka': 'Taksaka',
           'nama_mekanik': 'Budi Santoso',
-          'approved_at': '2025-11-30T10:15:00Z',
+          'approved_at': '2025-12-03T10:15:00Z',
           'pdf_url': 'https://example.com/laporan/43.pdf',
+          'status': 'approved',
         },
       ],
     };
@@ -160,17 +179,23 @@ class ApiService {
     List<LaporanPendingModel> pendingList = [];
     List<LaporanApprovedModel> approvedList = [];
 
+    // Parse pending approval
     for (var item in dummyPengawasData['pending_approval']) {
       pendingList.add(LaporanPendingModel.fromJson(item));
     }
 
+    // Parse riwayat dan sortir berdasarkan waktu terbaru
     for (var item in dummyPengawasData['riwayat_approved']) {
       approvedList.add(LaporanApprovedModel.fromJson(item));
     }
 
-    return {'pending_approval': pendingList, 'riwayat_approved': approvedList};
+    // ✅ Sortir riwayat berdasarkan waktu (terbaru di atas)
+    approvedList.sort((a, b) => b.approvedAt.compareTo(a.approvedAt));
 
-    /* 
+    return {'pending_approval': pendingList, 'riwayat_approved': approvedList};
+  }
+
+  /* 
     ========================================
     🚀 PRODUCTION API CALL (Gunakan kode ini saat integrasi dengan backend)
     ========================================
@@ -216,5 +241,4 @@ class ApiService {
       throw Exception('Error: $e');
     }
     */
-  }
 }

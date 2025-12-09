@@ -1,41 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'checksheet_komponen_page.dart';
+import 'checksheet_inventaris_page.dart';
 import '../../models/user_model.dart';
 import '../../models/jadwal_model.dart';
-import '../../models/checksheet_item_model.dart';
+import '../../models/checksheet_komponen_model.dart';
+import '../../models/checksheet_kategori_model.dart';
 import '../../services/checksheet_service.dart';
 import '../common/success_page.dart';
 import '../common/error_page.dart';
 
-class ChecksheetInventarisPage extends StatefulWidget {
+class ChecksheetKomponenPage extends StatefulWidget {
   final User user;
   final JadwalModel jadwal;
   final int laporanId;
+  final String initialSheet;
 
-  const ChecksheetInventarisPage({
+  const ChecksheetKomponenPage({
     Key? key,
     required this.user,
     required this.jadwal,
     required this.laporanId,
+    this.initialSheet = 'Mekanik',
   }) : super(key: key);
 
   @override
-  State<ChecksheetInventarisPage> createState() =>
-      _ChecksheetInventarisPageState();
+  State<ChecksheetKomponenPage> createState() => _ChecksheetKomponenPageState();
 }
 
-class _ChecksheetInventarisPageState extends State<ChecksheetInventarisPage> {
+class _ChecksheetKomponenPageState extends State<ChecksheetKomponenPage> {
   bool _isLoading = false;
-  String _currentSheet = 'Tool Box';
+  late String _currentSheet;
 
-  // ✅ Controller untuk tab horizontal scroll
   final ScrollController _scrollController = ScrollController();
-
-  // ✅ Controller untuk list vertical scroll
   final ScrollController _listScrollController = ScrollController();
-
-  // ✅ State variables
   bool _showBackToTop = false;
   bool _showLeftArrow = false;
   bool _showRightArrow = false;
@@ -51,17 +48,15 @@ class _ChecksheetInventarisPageState extends State<ChecksheetInventarisPage> {
     {'name': 'Gangguan', 'icon': Icons.warning},
   ];
 
-  late List<ChecksheetItemModel> _toolBoxItems;
+  late List<ChecksheetKategoriModel> _kategoriList;
 
   @override
   void initState() {
     super.initState();
-    _initializeToolBoxItems();
+    _currentSheet = widget.initialSheet;
+    _initializeKategoriData();
 
-    // ✅ Listener untuk horizontal tab scroll
     _scrollController.addListener(_updateScrollArrows);
-
-    // ✅ Listener untuk vertical list scroll (untuk FAB)
     _listScrollController.addListener(() {
       if (_listScrollController.hasClients) {
         final showButton = _listScrollController.offset > 200;
@@ -117,182 +112,6 @@ class _ChecksheetInventarisPageState extends State<ChecksheetInventarisPage> {
       target,
       duration: const Duration(milliseconds: 250),
       curve: Curves.easeOut,
-    );
-  }
-
-  void _initializeToolBoxItems() {
-    if (_currentSheet == 'Tool Box') {
-      _toolBoxItems = [
-        ChecksheetItemModel(
-          itemPemeriksaan: '1. Semboyan 21 Portable',
-          jumlah: '1 Set',
-        ),
-        ChecksheetItemModel(itemPemeriksaan: '2. Palu', jumlah: '1 Bh'),
-        ChecksheetItemModel(
-          itemPemeriksaan: '3. Linggis kecil',
-          jumlah: '1 Bh',
-        ),
-        ChecksheetItemModel(
-          itemPemeriksaan: '4. Selang air brake',
-          jumlah: '1 Bh',
-        ),
-        ChecksheetItemModel(itemPemeriksaan: '5. V-belt', jumlah: '1 Bh'),
-        ChecksheetItemModel(itemPemeriksaan: '6. Jas hujan', jumlah: '1 Bh'),
-        ChecksheetItemModel(itemPemeriksaan: '7. Rem blok', jumlah: '1 Bh'),
-        ChecksheetItemModel(itemPemeriksaan: '8. Kawat', jumlah: '1 Bh'),
-        ChecksheetItemModel(itemPemeriksaan: '9. Stop block', jumlah: '4 Bh'),
-        ChecksheetItemModel(itemPemeriksaan: '10. Kain lap', jumlah: '1 Bh'),
-        ChecksheetItemModel(
-          itemPemeriksaan: '11. Bandara putih',
-          jumlah: '1 Bh',
-        ),
-        ChecksheetItemModel(
-          itemPemeriksaan: '12. Bandara merah',
-          jumlah: '1 Bh',
-        ),
-        ChecksheetItemModel(
-          itemPemeriksaan: '13. Kabel 1 meter NYAF, NYHY θ 2,5mm',
-          jumlah: '1 Bh',
-        ),
-        ChecksheetItemModel(
-          itemPemeriksaan: '14. Lampu LED S.21',
-          jumlah: '2 Bh',
-        ),
-        ChecksheetItemModel(itemPemeriksaan: '15. WD-40', jumlah: '1 Bh'),
-        ChecksheetItemModel(
-          itemPemeriksaan: '16. Sarung tangan',
-          jumlah: '1 Set',
-        ),
-        ChecksheetItemModel(itemPemeriksaan: '17. Kran air', jumlah: '1 Bh'),
-      ];
-    } else if (_currentSheet == 'Tool Kit') {
-      _toolBoxItems = [
-        ChecksheetItemModel(
-          itemPemeriksaan: '1. Kunci pass ring uk. 8 - 32 mm',
-          jumlah: '1 Set',
-        ),
-        ChecksheetItemModel(itemPemeriksaan: '2. Kunci pipa', jumlah: '1 Brg'),
-        ChecksheetItemModel(
-          itemPemeriksaan: '3. Kunci Inggris',
-          jumlah: '1 Brg',
-        ),
-        ChecksheetItemModel(
-          itemPemeriksaan: '4. Kunci T13, 17, 19',
-          jumlah: '1 Set',
-        ),
-        ChecksheetItemModel(
-          itemPemeriksaan: '5. Tang kombinasi',
-          jumlah: '1 Brg',
-        ),
-        ChecksheetItemModel(itemPemeriksaan: '6. Palu besar', jumlah: '1 Brg'),
-        ChecksheetItemModel(itemPemeriksaan: '7. Obeng ring', jumlah: '1 Set'),
-        ChecksheetItemModel(
-          itemPemeriksaan: '8. Obeng plus dan minus',
-          jumlah: '1 Set',
-        ),
-        ChecksheetItemModel(itemPemeriksaan: '9. Tang ampere', jumlah: '1 Brg'),
-        ChecksheetItemModel(
-          itemPemeriksaan: '10. Thermo digital / continuous',
-          jumlah: '1 Brg',
-        ),
-        ChecksheetItemModel(
-          itemPemeriksaan: '11. Bener / Pahat',
-          jumlah: '1 Brg',
-        ),
-        ChecksheetItemModel(
-          itemPemeriksaan: '12. Isolasi bening, hitam',
-          jumlah: '2 Roll',
-        ),
-        ChecksheetItemModel(itemPemeriksaan: '13. Avo meter', jumlah: '1 Brg'),
-        ChecksheetItemModel(
-          itemPemeriksaan: '14. Senter charging',
-          jumlah: '1 Brg',
-        ),
-        ChecksheetItemModel(
-          itemPemeriksaan: '15. Remote AC/lampu/fan',
-          jumlah: '3 Brg',
-        ),
-        ChecksheetItemModel(itemPemeriksaan: '16. Tespen', jumlah: '1 Brg'),
-      ];
-    } else if (_currentSheet == 'Mekanik' || _currentSheet == 'Genset') {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder:
-                (context) => ChecksheetKomponenPage(
-                  user: widget.user,
-                  jadwal: widget.jadwal,
-                  laporanId: widget.laporanId,
-                  initialSheet: _currentSheet,
-                ),
-          ),
-        );
-      });
-      _toolBoxItems = []; // Temporary empty
-    } else {
-      _toolBoxItems = [
-        ChecksheetItemModel(
-          itemPemeriksaan: '1. Item default untuk $_currentSheet',
-          jumlah: '1 Brg',
-        ),
-      ];
-    }
-  }
-
-  String _getInitials() {
-    if (widget.user.nama == null || widget.user.nama!.isEmpty) {
-      return 'M';
-    }
-
-    final parts = widget.user.nama!.split(' ');
-    if (parts.length >= 2) {
-      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
-    } else {
-      return widget.user.nama!.substring(0, 1).toUpperCase();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          _buildCustomHeader(),
-          _buildBackButton(),
-          _buildLaporanInfoCard(),
-          _buildSheetTabs(),
-          _buildSheetTitle(),
-
-          Expanded(
-            child: ListView(
-              controller:
-                  _listScrollController, // ✅ Penting: Tambahkan controller
-              padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0),
-              children: [
-                ..._toolBoxItems.asMap().entries.map((entry) {
-                  return _buildChecklistItem(entry.value, entry.key);
-                }).toList(),
-
-                const SizedBox(height: 4.0),
-                _buildBottomButton(),
-                const SizedBox(height: 16.0),
-              ],
-            ),
-          ),
-        ],
-      ),
-      // ✅ Floating Action Button
-      floatingActionButton:
-          _showBackToTop
-              ? FloatingActionButton(
-                onPressed: _scrollToTop,
-                backgroundColor: const Color(0xFF2196F3),
-                mini: false, // ✅ Ukuran normal
-                child: const Icon(Icons.arrow_upward, color: Colors.white),
-              )
-              : null,
     );
   }
 
@@ -375,9 +194,9 @@ class _ChecksheetInventarisPageState extends State<ChecksheetInventarisPage> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
+              Icon(
                 Icons.arrow_back,
-                color: Color(0xFF0063F7),
+                color: const Color(0xFF0063F7),
                 size: 20.0,
               ),
               const SizedBox(width: 8.0),
@@ -440,10 +259,10 @@ class _ChecksheetInventarisPageState extends State<ChecksheetInventarisPage> {
                           fontWeight: FontWeight.w500,
                         ),
                         children: [
-                          const TextSpan(
+                          TextSpan(
                             text: 'GMR-SMT',
                             style: TextStyle(
-                              color: Color(0xFF0063F7),
+                              color: const Color(0xFF0063F7),
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -545,27 +364,26 @@ class _ChecksheetInventarisPageState extends State<ChecksheetInventarisPage> {
                     onTap: () {
                       final sheetName = sheet['name'] as String;
 
-                      // ✅ UPDATE: Navigasi berdasarkan tipe sheet
-                      if (sheetName == 'Mekanik' || sheetName == 'Genset') {
-                        // Navigasi ke ChecksheetKomponenPage
+                      // ✅ Navigasi ke page yang sesuai
+                      if (sheetName == 'Tool Box' || sheetName == 'Tool Kit') {
+                        // Kembali ke ChecksheetInventarisPage
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
                             builder:
-                                (context) => ChecksheetKomponenPage(
+                                (context) => ChecksheetInventarisPage(
                                   user: widget.user,
                                   jadwal: widget.jadwal,
                                   laporanId: widget.laporanId,
-                                  initialSheet: sheetName,
                                 ),
                           ),
                         );
-                      } else if (sheetName == 'Tool Box' ||
-                          sheetName == 'Tool Kit') {
-                        // Update state di page ini
+                      } else if (sheetName == 'Mekanik' ||
+                          sheetName == 'Genset') {
+                        // Stay di ChecksheetKomponenPage, update sheet
                         setState(() {
                           _currentSheet = sheetName;
-                          _initializeToolBoxItems();
+                          _initializeKategoriData();
                         });
 
                         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -574,7 +392,8 @@ class _ChecksheetInventarisPageState extends State<ChecksheetInventarisPage> {
                           }
                         });
                       } else {
-                        // Untuk sheet lainnya
+                        // Untuk sheet lainnya (Mekanik 2, Elektrik, Gangguan)
+                        // Bisa redirect ke page berbeda atau show coming soon
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text('$sheetName belum tersedia'),
@@ -753,44 +572,343 @@ class _ChecksheetInventarisPageState extends State<ChecksheetInventarisPage> {
     );
   }
 
-  Widget _buildSheetTitle() {
-    final completedCount =
-        _toolBoxItems.where((item) => item.hasilInput.isNotEmpty).length;
-    final totalCount = _toolBoxItems.length;
+  void _initializeKategoriData() {
+    if (_listScrollController.hasClients) {
+      _listScrollController.jumpTo(0);
+    }
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 12.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          bottom: BorderSide(color: Colors.grey.shade200, width: 1.0),
-        ),
-      ),
-      child: Row(
-        children: [
-          Text(
-            '$_currentSheet Checksheet (Inventaris)',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 15.0,
-              fontWeight: FontWeight.w700,
-              color: Colors.black,
+    if (_currentSheet == 'Mekanik') {
+      _kategoriList = [
+        ChecksheetKategoriModel(
+          namaKategori: 'ALAT KOPLING TARIK',
+          items: [
+            ChecksheetKomponenModel(
+              itemPemeriksaan: '1. Kopler Mekanik',
+              standar: 'Lengkap',
             ),
-          ),
-          const Spacer(),
-          Text(
-            '$completedCount/$totalCount',
-            style: GoogleFonts.inter(
-              fontSize: 13.0,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[600],
+            ChecksheetKomponenModel(
+              itemPemeriksaan: '2. Kabel Tiang Otot',
+              standar: 'Baik/Utuh',
+            ),
+            ChecksheetKomponenModel(
+              itemPemeriksaan: '3. Rantai Penarik Kait',
+              standar: 'Baik',
+            ),
+          ],
+        ),
+        ChecksheetKategoriModel(
+          namaKategori: 'BOGIE & PERANGKATNYA',
+          items: [
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'a. Pegas Daun / Primary Suspension',
+              standar: 'Baik',
+            ),
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'b. Bantalan Dimper/ Spring Anchor',
+              standar: 'Baik/Utuh',
+            ),
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'c. Pergerakan Balok Ayun',
+              standar: 'Baik',
+            ),
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'd. Bak Rami / Beaker',
+              standar: 'Baik',
+            ),
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'e. Kebersihan Perangkat',
+              standar: 'Lengkap, Baik/Utuh',
+            ),
+          ],
+        ),
+        ChecksheetKategoriModel(
+          namaKategori: 'RODA & GANDARNYA',
+          items: [
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'a. Roda Akhir / Beaker',
+              standar: 'Baik',
+            ),
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'b. Body Rami / Beaker',
+              standar: 'Baik',
+            ),
+          ],
+        ),
+        ChecksheetKategoriModel(
+          namaKategori: 'PEMERIKSAAN',
+          items: [
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'a. Kebersihan/ Penampungan',
+              standar: 'Bersih',
+            ),
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'b. Semua',
+              standar: 'Min. 4 Kg/ cm² atau sesuai SIK',
+            ),
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'c. Kondisi Ban Blok',
+              standar: 'Lengkap',
+            ),
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'd. Rem-Gantingan',
+              standar: 'Baik/ Lengkap',
+            ),
+          ],
+        ),
+        ChecksheetKategoriModel(
+          namaKategori: 'CATATAN PENTING',
+          items: [
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'a. Kereta/GAS',
+              standar: 'Baik',
+            ),
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'b. Listrik',
+              standar: 'Baik',
+            ),
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'c. No AC/Kompresor',
+              standar: '3 Unit (HP)',
+            ),
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'd. Indikasi pintu-pintu',
+              standar: 'Baik/lengkap dan berfungsi',
+            ),
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'e. Anjuran',
+              standar: 'Min. 2 Kg/ cm²',
+            ),
+          ],
+        ),
+        ChecksheetKategoriModel(
+          namaKategori: 'HIDRAULIK BRAKE',
+          items: [
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'a. Cylinder/ Distributor Wheel',
+              standar: 'Baik/Tidak Bocor',
+            ),
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'b. Slang/ piping/ Fitting',
+              standar: 'Baik/Tidak Bocor',
+            ),
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'c. Block Aplikasi cylinder (Jika ada)',
+              standar: 'Tidak Retak dan Aus',
+            ),
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'd. Accul (Indikator vert. 13)',
+              standar: 'Baik/Tidak',
+            ),
+          ],
+        ),
+        ChecksheetKategoriModel(
+          namaKategori: 'PENGARAH BRACKET',
+          items: [
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'a. Kondisi gerakan-slinder, piston dll',
+              standar: 'Baik (Tidak macet & lancar)',
+            ),
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'b. Kondisi gerakan slinder piston',
+              standar: 'Baik (Tidak Bocor)',
+            ),
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'c. Brake slinding piston (10)',
+              standar: 'Baik (Tidak Bocor)',
+            ),
+          ],
+        ),
+        ChecksheetKategoriModel(
+          namaKategori: 'INTERIOR/CEILING',
+          items: [
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'a. Interior/Ceiling (Normal)',
+              standar: 'Baik/Normal',
+            ),
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'b. Tempat/Jalur',
+              standar: 'Bersih',
+            ),
+          ],
+        ),
+        ChecksheetKategoriModel(
+          namaKategori: 'PENANGKAL GUNCANG',
+          items: [
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'a. Penangkal Stickon',
+              standar: 'Berfungsi',
+            ),
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'b. Penangkal',
+              standar: 'Terpasang',
+            ),
+          ],
+        ),
+      ];
+    } else if (_currentSheet == 'Genset') {
+      _kategoriList = [
+        ChecksheetKategoriModel(
+          namaKategori: 'PEMERIKSAAN',
+          items: [
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'a. Kebersihan/Penampungan',
+              standar: 'Bersih',
+            ),
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'b. Sumber',
+              standar: 'Min. 4 Kg/ cm² atau sesuai SIK',
+            ),
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'c. Kondisi Ban Blok',
+              standar: 'Lengkap',
+            ),
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'd. Kunci Palu',
+              standar: 'Baik/Lengkap',
+            ),
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'e. Dinding-panel (Tidak bocor, tambahan)',
+              standar: 'Baik/Utuh (Tidak ada tetes/kebocoran)',
+            ),
+          ],
+        ),
+        ChecksheetKategoriModel(
+          namaKategori: 'PENGECEKAN ON/OFF',
+          items: [
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'a. Genset On',
+              standar: 'On/Normal',
+            ),
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'b. Genset Off',
+              standar: 'Off/Tidak Berjalan',
+            ),
+          ],
+        ),
+        ChecksheetKategoriModel(
+          namaKategori: 'CATATAN PENTING',
+          items: [
+            ChecksheetKomponenModel(
+              itemPemeriksaan: 'Catatan Penting',
+              standar: 'Pastikan genset dalam kondisi baik',
+            ),
+          ],
+        ),
+      ];
+    } else {
+      _kategoriList = [];
+    }
+  }
+
+  String _getInitials() {
+    if (widget.user.nama == null || widget.user.nama!.isEmpty) {
+      return 'M';
+    }
+
+    final parts = widget.user.nama!.split(' ');
+    if (parts.length >= 2) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    } else {
+      return widget.user.nama!.substring(0, 1).toUpperCase();
+    }
+  }
+
+  int _getTotalItems() {
+    return _kategoriList.fold(0, (sum, kat) => sum + kat.items.length);
+  }
+
+  int _getCompletedItems() {
+    return _kategoriList.fold(
+      0,
+      (sum, kat) =>
+          sum + kat.items.where((item) => item.hasilInput.isNotEmpty).length,
+    );
+  }
+
+  List<ChecksheetKomponenModel> _getAllItems() {
+    final allItems = <ChecksheetKomponenModel>[];
+    for (var kategori in _kategoriList) {
+      allItems.addAll(kategori.items);
+    }
+    return allItems;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Column(
+        children: [
+          _buildCustomHeader(),
+          _buildBackButton(),
+          _buildLaporanInfoCard(),
+          _buildSheetTabs(),
+          _buildSheetTitle(),
+
+          Expanded(
+            child: ListView(
+              controller: _listScrollController,
+              padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0),
+              children: [
+                // Render per kategori
+                ..._kategoriList.map((kategori) {
+                  return _buildKategoriSection(kategori);
+                }).toList(),
+
+                const SizedBox(height: 4.0),
+                _buildBottomButton(),
+                const SizedBox(height: 16.0),
+              ],
             ),
           ),
         ],
       ),
+      floatingActionButton:
+          _showBackToTop
+              ? FloatingActionButton(
+                onPressed: _scrollToTop,
+                backgroundColor: const Color(0xFF2196F3),
+                child: const Icon(Icons.arrow_upward, color: Colors.white),
+              )
+              : null,
     );
   }
 
-  Widget _buildChecklistItem(ChecksheetItemModel item, int index) {
+  // ✅ Widget untuk render kategori
+  Widget _buildKategoriSection(ChecksheetKategoriModel kategori) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header kategori
+        Container(
+          width: double.infinity,
+          margin: const EdgeInsets.only(top: 16.0, bottom: 8.0),
+          padding: const EdgeInsets.all(12.0),
+          decoration: BoxDecoration(
+            color: const Color(0xFF2196F3).withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8.0),
+            border: Border.all(color: const Color(0xFF2196F3), width: 1.5),
+          ),
+          child: Text(
+            kategori.namaKategori,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 14.0,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF2196F3),
+            ),
+          ),
+        ),
+
+        // Items dalam kategori
+        ...kategori.items.asMap().entries.map((entry) {
+          return _buildKomponenItem(entry.value, entry.key);
+        }).toList(),
+      ],
+    );
+  }
+
+  // ✅ Widget untuk item komponen (dengan Standar & Hasil Input)
+  Widget _buildKomponenItem(ChecksheetKomponenModel item, int index) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8.0),
       padding: const EdgeInsets.all(16.0),
@@ -808,45 +926,123 @@ class _ChecksheetInventarisPageState extends State<ChecksheetInventarisPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Nama item
+          Text(
+            item.itemPemeriksaan,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 14.0,
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 12.0),
+
+          // Row: Standar & Hasil Input
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Standar (Read-only)
               Expanded(
-                child: Text(
-                  item.itemPemeriksaan,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black,
-                    height: 1.4,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Standar',
+                      style: GoogleFonts.inter(
+                        fontSize: 11.0,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    const SizedBox(height: 4.0),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12.0,
+                        vertical: 10.0,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade50,
+                        borderRadius: BorderRadius.circular(6.0),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: Text(
+                        item.standar,
+                        style: GoogleFonts.inter(
+                          fontSize: 12.0,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 8.0),
-              Text(
-                'JML: ${item.jumlah}',
-                style: GoogleFonts.inter(
-                  fontSize: 12.0,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.grey[600],
+              const SizedBox(width: 12.0),
+
+              // Hasil Input (Editable)
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Hasil',
+                      style: GoogleFonts.inter(
+                        fontSize: 11.0,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    const SizedBox(height: 4.0),
+                    TextField(
+                      decoration: InputDecoration(
+                        hintText: 'Isi hasil...',
+                        hintStyle: GoogleFonts.inter(
+                          fontSize: 12.0,
+                          color: Colors.grey[400],
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12.0,
+                          vertical: 10.0,
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6.0),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6.0),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6.0),
+                          borderSide: const BorderSide(
+                            color: Color(0xFF2196F3),
+                            width: 1.5,
+                          ),
+                        ),
+                      ),
+                      style: GoogleFonts.inter(
+                        fontSize: 12.0,
+                        color: Colors.black87,
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          item.hasilInput = value;
+                        });
+                      },
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
+
           const SizedBox(height: 12.0),
-          Row(
-            children: [
-              _buildRadioButton(item, 'Baik'),
-              const SizedBox(width: 8.0),
-              _buildRadioButton(item, 'Rusak'),
-              const SizedBox(width: 8.0),
-              _buildRadioButton(item, 'Tidak ada'),
-            ],
-          ),
-          const SizedBox(height: 12.0),
+
+          // Keterangan
           TextField(
             decoration: InputDecoration(
-              hintText: 'Keterangan(Opsional)',
+              hintText: 'Keterangan/Tindak Lanjut(Opsional)',
               hintStyle: GoogleFonts.inter(
                 fontSize: 12.0,
                 color: Colors.grey[400],
@@ -874,8 +1070,8 @@ class _ChecksheetInventarisPageState extends State<ChecksheetInventarisPage> {
               ),
             ),
             style: GoogleFonts.inter(fontSize: 13.0, color: Colors.black87),
-            maxLines: 3,
-            minLines: 2,
+            maxLines: 2,
+            minLines: 1,
             onChanged: (value) {
               item.keterangan = value;
             },
@@ -885,47 +1081,13 @@ class _ChecksheetInventarisPageState extends State<ChecksheetInventarisPage> {
     );
   }
 
-  Widget _buildRadioButton(ChecksheetItemModel item, String label) {
-    final isSelected = item.hasilInput.toUpperCase() == label.toUpperCase();
-
-    return Expanded(
-      child: InkWell(
-        onTap: () {
-          setState(() {
-            item.hasilInput = label.toUpperCase();
-          });
-        },
-        borderRadius: BorderRadius.circular(6.0),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
-          decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF0063F7) : Colors.grey.shade50,
-            borderRadius: BorderRadius.circular(6.0),
-            border: Border.all(
-              color:
-                  isSelected ? const Color(0xFF0063F7) : Colors.grey.shade300,
-              width: 1.0,
-            ),
-          ),
-          child: Center(
-            child: Text(
-              label,
-              style: GoogleFonts.inter(
-                fontSize: 12.0,
-                fontWeight: FontWeight.w600,
-                color: isSelected ? Colors.white : Colors.grey[700],
-              ),
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  // Widget lainnya sama seperti ChecksheetInventarisPage
+  // _buildCustomHeader(), _buildBackButton(), _buildLaporanInfoCard(), dll.
+  // Copy dari ChecksheetInventarisPage
 
   Widget _buildBottomButton() {
-    final allFilled = _toolBoxItems.every((item) => item.hasilInput.isNotEmpty);
+    final allItems = _getAllItems();
+    final allFilled = allItems.every((item) => item.hasilInput.isNotEmpty);
 
     return SizedBox(
       width: double.infinity,
@@ -963,28 +1125,19 @@ class _ChecksheetInventarisPageState extends State<ChecksheetInventarisPage> {
     );
   }
 
-  // ✅ Method untuk scroll ke atas
-  void _scrollToTop() {
-    if (_listScrollController.hasClients) {
-      _listScrollController.animateTo(
-        0.0,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
-      );
-    }
-  }
-
   void _handleSimpan() async {
     setState(() {
       _isLoading = true;
     });
 
     try {
-      final result = await ChecksheetService.simpanDataInventaris(
+      final allItems = _getAllItems();
+
+      final result = await ChecksheetService.simpanDataKomponen(
         laporanId: widget.laporanId,
         token: widget.user.token ?? '',
         namaSheet: _currentSheet,
-        items: _toolBoxItems,
+        items: allItems,
       );
 
       setState(() {
@@ -1027,4 +1180,53 @@ class _ChecksheetInventarisPageState extends State<ChecksheetInventarisPage> {
       }
     }
   }
+
+  void _scrollToTop() {
+    _listScrollController.animateTo(
+      0.0,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  Widget _buildSheetTitle() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 12.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          bottom: BorderSide(color: Colors.grey.shade200, width: 1.0),
+        ),
+      ),
+      child: Row(
+        children: [
+          Text(
+            '$_currentSheet Checksheet (Komponen)',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 15.0,
+              fontWeight: FontWeight.w700,
+              color: Colors.black,
+            ),
+          ),
+          const Spacer(),
+          Text(
+            '${_getCompletedItems()}/${_getTotalItems()}',
+            style: GoogleFonts.inter(
+              fontSize: 13.0,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[600],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Copy widget lainnya dari ChecksheetInventarisPage:
+  // - _buildCustomHeader()
+  // - _buildBackButton()
+  // - _buildLaporanInfoCard()
+  // - _buildSheetTabs()
+  // - _buildScrollIndicator()
+  // - _buildIndicatorArrow()
 }

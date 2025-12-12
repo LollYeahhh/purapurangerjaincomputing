@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+<<<<<<< HEAD
 import 'pages/login_page.dart';
 import 'pages/change_password_page.dart';
 import 'pages/success_page.dart';
 import 'pages/error_page.dart';
+=======
+>>>>>>> dd6d6d730f479ddfb82c390b2f86b7ced6662595
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'pages/auth/login_page.dart';
@@ -43,9 +46,12 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.white,
       ),
 <<<<<<< HEAD
+<<<<<<< HEAD
 
       /// Rute awal aplikasi dimulai dari LoginPage
 =======
+=======
+>>>>>>> dd6d6d730f479ddfb82c390b2f86b7ced6662595
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,

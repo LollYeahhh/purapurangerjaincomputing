@@ -4,6 +4,9 @@ import '../../models/user_model.dart';
 import '../../models/jadwal_model.dart';
 import '../../models/checksheet_gerbong_fase_model.dart';
 import 'checksheet_mekanik2_elektrik_page.dart';
+import 'checksheet_inventaris_page.dart';
+import 'checksheet_komponen_page.dart';
+import 'gangguan_form_page.dart';
 
 class ChecksheetGerbongFasePage extends StatefulWidget {
   final User user;
@@ -31,10 +34,101 @@ class _ChecksheetGerbongFasePageState extends State<ChecksheetGerbongFasePage> {
 
   final TextEditingController _nomorGerbongController = TextEditingController();
 
+  // ✅ Scroll Controllers
+  final ScrollController _scrollController = ScrollController();
+  final ScrollController _listScrollController = ScrollController();
+
+  // ✅ State untuk scroll indicators
+  bool _showBackToTop = false;
+  bool _showLeftArrow = false;
+  bool _showRightArrow = false;
+  double _scrollProgress = 0.0;
+
+  // ✅ Sheet tabs data
+  final List<Map<String, dynamic>> _sheets = [
+    {'name': 'Tool Box', 'icon': Icons.construction},
+    {'name': 'Tool Kit', 'icon': Icons.build},
+    {'name': 'Mekanik', 'icon': Icons.engineering},
+    {'name': 'Genset', 'icon': Icons.electrical_services},
+    {'name': 'Mekanik 2', 'icon': Icons.settings},
+    {'name': 'Elektrik', 'icon': Icons.bolt},
+    {'name': 'Gangguan', 'icon': Icons.warning},
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+
+    // ✅ Add listener untuk horizontal scroll indicator
+    _scrollController.addListener(_updateScrollArrows);
+
+    // ✅ Add listener untuk back to top button
+    _listScrollController.addListener(() {
+      if (_listScrollController.hasClients) {
+        final showButton = _listScrollController.offset > 200;
+        if (showButton != _showBackToTop) {
+          setState(() {
+            _showBackToTop = showButton;
+          });
+        }
+      }
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) => _updateScrollArrows());
+  }
+
   @override
   void dispose() {
     _nomorGerbongController.dispose();
+    _scrollController.removeListener(_updateScrollArrows);
+    _scrollController.dispose();
+    _listScrollController.dispose();
     super.dispose();
+  }
+
+  // ✅ Update scroll arrows
+  void _updateScrollArrows() {
+    if (!mounted || !_scrollController.hasClients) return;
+
+    final double maxScroll = _scrollController.position.maxScrollExtent;
+    final double currentScroll = _scrollController.offset;
+
+    setState(() {
+      _showLeftArrow = currentScroll > 0;
+      _showRightArrow = currentScroll < maxScroll;
+
+      if (maxScroll > 0) {
+        _scrollProgress = (currentScroll / maxScroll).clamp(0.0, 1.0);
+      } else {
+        _scrollProgress = 0.0;
+      }
+    });
+  }
+
+  // ✅ Scroll tabs by offset
+  void _scrollTabsBy(double offset) {
+    if (!_scrollController.hasClients) return;
+
+    final position = _scrollController.position;
+    final target = (position.pixels + offset).clamp(
+      0.0,
+      position.maxScrollExtent,
+    );
+
+    _scrollController.animateTo(
+      target,
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeOut,
+    );
+  }
+
+  // ✅ Scroll to top
+  void _scrollToTop() {
+    _listScrollController.animateTo(
+      0.0,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
   }
 
   Widget _buildCustomHeader() {
@@ -111,7 +205,10 @@ class _ChecksheetGerbongFasePageState extends State<ChecksheetGerbongFasePage> {
       child: Align(
         alignment: Alignment.centerLeft,
         child: InkWell(
-          onTap: () => Navigator.pop(context),
+          onTap: () {
+            // ✅ Kembali ke Dashboard (halaman pertama)
+            Navigator.popUntil(context, (route) => route.isFirst);
+          },
           borderRadius: BorderRadius.circular(8.0),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -232,9 +329,289 @@ class _ChecksheetGerbongFasePageState extends State<ChecksheetGerbongFasePage> {
     );
   }
 
+  // ✅ Sheet Tabs dengan scroll indicator
+  Widget _buildSheetTabs() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          bottom: BorderSide(color: Colors.grey.shade200, width: 1.0),
+        ),
+      ),
+      child: Column(
+        children: [
+          ClipRect(
+            child: SizedBox(
+              height: 50.0,
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (notification) {
+                  if (notification is ScrollUpdateNotification ||
+                      notification is OverscrollNotification ||
+                      notification is ScrollEndNotification) {
+                    _updateScrollArrows();
+                  }
+                  return false;
+                },
+                child: ListView.builder(
+                  controller: _scrollController,
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 4.0,
+                  ),
+                  itemCount: _sheets.length,
+                  itemBuilder: (context, index) {
+                    final sheet = _sheets[index];
+                    final isSelected = sheet['name'] == widget.sheetType;
+
+                    return GestureDetector(
+                      onTap: () {
+                        final sheetName = sheet['name'] as String;
+
+                        final currentScrollPosition =
+                            _scrollController.hasClients
+                                ? _scrollController.offset
+                                : 0.0;
+
+                        // ✅ Navigasi berdasarkan tipe sheet
+                        if (sheetName == 'Tool Box' ||
+                            sheetName == 'Tool Kit') {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => ChecksheetInventarisPage(
+                                    user: widget.user,
+                                    jadwal: widget.jadwal,
+                                    laporanId: widget.laporanId,
+                                  ),
+                            ),
+                          );
+                        } else if (sheetName == 'Mekanik' ||
+                            sheetName == 'Genset') {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => ChecksheetKomponenPage(
+                                    user: widget.user,
+                                    jadwal: widget.jadwal,
+                                    laporanId: widget.laporanId,
+                                    initialSheet: sheetName,
+                                  ),
+                            ),
+                          );
+                        } else if (sheetName == 'Mekanik 2' ||
+                            sheetName == 'Elektrik') {
+                          if (sheetName == widget.sheetType) {
+                            return;
+                          }
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => ChecksheetGerbongFasePage(
+                                    user: widget.user,
+                                    jadwal: widget.jadwal,
+                                    laporanId: widget.laporanId,
+                                    sheetType: sheetName,
+                                  ),
+                            ),
+                          );
+                        } else if (sheetName == 'Gangguan') {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => GangguanFormPage(
+                                    user: widget.user,
+                                    jadwal: widget.jadwal,
+                                    laporanId: widget.laporanId,
+                                  ),
+                            ),
+                          );
+                        }
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 8.0),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12.0,
+                          vertical: 8.0,
+                        ),
+                        constraints: const BoxConstraints(minWidth: 110.0),
+                        decoration: BoxDecoration(
+                          color:
+                              isSelected
+                                  ? const Color(0xFF2196F3)
+                                  : Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(
+                              sheet['icon'],
+                              size: 18.0,
+                              color:
+                                  isSelected ? Colors.white : Colors.grey[700],
+                            ),
+                            const SizedBox(width: 6.0),
+                            Text(
+                              sheet['name'],
+                              style: GoogleFonts.inter(
+                                fontSize: 12.0,
+                                fontWeight:
+                                    isSelected
+                                        ? FontWeight.w700
+                                        : FontWeight.w600,
+                                color:
+                                    isSelected
+                                        ? Colors.white
+                                        : Colors.grey[700],
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 1.0),
+          _buildScrollIndicator(),
+        ],
+      ),
+    );
+  }
+
+  // ✅ Scroll Indicator
+  Widget _buildScrollIndicator() {
+    if (!_scrollController.hasClients) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Row(
+          children: [
+            _buildIndicatorArrow(isLeft: true, enabled: false, onTap: () {}),
+            const SizedBox(width: 8.0),
+            Expanded(
+              child: Container(
+                height: 6.0,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8.0),
+            _buildIndicatorArrow(isLeft: false, enabled: false, onTap: () {}),
+          ],
+        ),
+      );
+    }
+
+    final double maxScroll = _scrollController.position.maxScrollExtent;
+    if (maxScroll == 0) {
+      return const SizedBox.shrink();
+    }
+
+    final double viewportWidth = _scrollController.position.viewportDimension;
+    final double totalContentWidth = maxScroll + viewportWidth;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Row(
+        children: [
+          _buildIndicatorArrow(
+            isLeft: true,
+            enabled: _showLeftArrow,
+            onTap: () => _scrollTabsBy(-viewportWidth * 0.8),
+          ),
+          const SizedBox(width: 8.0),
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final double trackWidth = constraints.maxWidth;
+                final double indicatorWidth =
+                    ((viewportWidth / totalContentWidth) * trackWidth).clamp(
+                      32.0,
+                      trackWidth,
+                    );
+
+                final double scrollRatio = _scrollProgress;
+                final double maxIndicatorPosition = trackWidth - indicatorWidth;
+                final double indicatorLeft = (maxIndicatorPosition *
+                        scrollRatio)
+                    .clamp(0.0, maxIndicatorPosition);
+
+                return SizedBox(
+                  height: 12.0,
+                  child: Stack(
+                    alignment: Alignment.centerLeft,
+                    children: [
+                      Container(
+                        height: 6.0,
+                        decoration: BoxDecoration(
+                          color: const Color.fromARGB(255, 255, 255, 255),
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                      ),
+                      Positioned(
+                        left: indicatorLeft,
+                        child: Container(
+                          height: 5.0,
+                          width: indicatorWidth,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFABAAC4),
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(width: 8.0),
+          _buildIndicatorArrow(
+            isLeft: false,
+            enabled: _showRightArrow,
+            onTap: () => _scrollTabsBy(viewportWidth * 0.8),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ✅ Indicator Arrow
+  Widget _buildIndicatorArrow({
+    required bool isLeft,
+    required bool enabled,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: enabled ? onTap : null,
+      borderRadius: BorderRadius.circular(4.0),
+      child: Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: Icon(
+          isLeft ? Icons.chevron_left : Icons.chevron_right,
+          size: 20.0,
+          color: enabled ? const Color(0xFF7B83EB) : Colors.grey.shade400,
+        ),
+      ),
+    );
+  }
+
   Widget _buildFormSection() {
     return Container(
-      margin: const EdgeInsets.all(16.0),
+      margin: const EdgeInsets.symmetric(horizontal: 0.0),
       padding: const EdgeInsets.all(20.0),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -467,7 +844,7 @@ class _ChecksheetGerbongFasePageState extends State<ChecksheetGerbongFasePage> {
   Widget _buildMulaiLaporanButton() {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.all(16.0),
+      margin: const EdgeInsets.only(top: 16.0),
       child: ElevatedButton(
         onPressed: () {
           if (_formKey.currentState!.validate() &&
@@ -535,23 +912,36 @@ class _ChecksheetGerbongFasePageState extends State<ChecksheetGerbongFasePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Colors.white, // ✅ Ganti dari Colors.grey.shade50
       body: Column(
         children: [
           _buildCustomHeader(),
           _buildBackButton(),
+          _buildLaporanInfoCard(),
+          _buildSheetTabs(), // ✅ TAMBAHKAN INI
           Expanded(
             child: ListView(
+              controller: _listScrollController, // ✅ TAMBAHKAN INI
+              padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0),
               children: [
-                _buildLaporanInfoCard(),
+                const SizedBox(height: 16.0),
                 _buildFormSection(),
                 _buildMulaiLaporanButton(),
-                const SizedBox(height: 16.0),
+                const SizedBox(height: 32.0),
               ],
             ),
           ),
         ],
       ),
+      // ✅ TAMBAHKAN FLOATING ACTION BUTTON
+      floatingActionButton:
+          _showBackToTop
+              ? FloatingActionButton(
+                onPressed: _scrollToTop,
+                backgroundColor: const Color(0xFF2196F3),
+                child: const Icon(Icons.arrow_upward, color: Colors.white),
+              )
+              : null,
     );
   }
 }

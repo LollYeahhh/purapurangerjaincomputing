@@ -372,7 +372,10 @@ class _ChecksheetInventarisPageState extends State<ChecksheetInventarisPage> {
       child: Align(
         alignment: Alignment.centerLeft,
         child: InkWell(
-          onTap: () => Navigator.pop(context),
+          onTap: () {
+            // ✅ Kembali ke Dashboard (halaman pertama)
+            Navigator.popUntil(context, (route) => route.isFirst);
+          },
           borderRadius: BorderRadius.circular(8.0),
           child: Row(
             mainAxisSize: MainAxisSize.min,

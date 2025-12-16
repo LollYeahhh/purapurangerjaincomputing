@@ -610,6 +610,10 @@ class _PengawasHomePageState extends State<PengawasHomePage>
                           (context) => ChecksheetInventarisReviewPage(
                             user: widget.user,
                             laporanId: laporan.laporanId,
+                            noKa: laporan.noKa,
+                            namaKa: laporan.namaKa,
+                            namaMekanik: laporan.namaMekanik,
+                            submittedAt: laporan.submittedAt.toString(),
                           ),
                     ),
                   ).then((_) {
@@ -843,6 +847,10 @@ class _PengawasHomePageState extends State<PengawasHomePage>
                             (context) => ChecksheetInventarisReviewPage(
                               user: widget.user,
                               laporanId: laporan.laporanId,
+                              noKa: laporan.noKa,
+                              namaKa: laporan.namaKa,
+                              namaMekanik: laporan.namaMekanik,
+                              submittedAt: laporan.approvedAt.toString(),
                             ),
                       ),
                     );

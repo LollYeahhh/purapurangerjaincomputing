@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../models/user_model.dart';
 import '../../models/laporan_model.dart';
 import '../../services/api_service.dart';
 import '../auth/login_page.dart';
+import 'checksheet_inventaris_review_page.dart';
 
 class PengawasHomePage extends StatefulWidget {
   final User user;
@@ -600,14 +602,20 @@ class _PengawasHomePageState extends State<PengawasHomePage>
               // Tombol Review
               ElevatedButton(
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Review ${laporan.noKa} - ${laporan.namaKa}',
-                      ),
-                      backgroundColor: const Color(0xFF2C2A6B),
+                  // ✅ NAVIGASI KE HALAMAN REVIEW
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) => ChecksheetInventarisReviewPage(
+                            user: widget.user,
+                            laporanId: laporan.laporanId,
+                          ),
                     ),
-                  );
+                  ).then((_) {
+                    // Refresh data setelah kembali dari review page
+                    _loadDashboard();
+                  });
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2196F3),
@@ -826,16 +834,22 @@ class _PengawasHomePageState extends State<PengawasHomePage>
               // Tombol Detail & PDF
               ElevatedButton(
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        isRejected
-                            ? 'Melihat alasan penolakan ${laporan.noKa}'
-                            : 'Membuka PDF: ${laporan.pdfUrl}',
+                  if (isRejected) {
+                    // ✅ Jika ditolak, buka halaman review untuk lihat detail
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (context) => ChecksheetInventarisReviewPage(
+                              user: widget.user,
+                              laporanId: laporan.laporanId,
+                            ),
                       ),
-                      backgroundColor: statusColor,
-                    ),
-                  );
+                    );
+                  } else {
+                    // ✅ Jika disetujui, download PDF
+                    _handleDownloadPdf(laporan.laporanId, laporan.pdfUrl);
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: statusColor,
@@ -883,6 +897,39 @@ class _PengawasHomePageState extends State<PengawasHomePage>
         ],
       ),
     );
+  }
+
+  Future<void> _handleDownloadPdf(int laporanId, String? pdfUrl) async {
+    if (pdfUrl == null || pdfUrl.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('PDF tidak tersedia'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    try {
+      // ✅ Gunakan url_launcher untuk membuka PDF di browser
+      final Uri url = Uri.parse(pdfUrl);
+
+      // Import package url_launcher
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        throw 'Tidak dapat membuka URL: $pdfUrl';
+      }
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal membuka PDF: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   String _formatDateTime(DateTime dateTime) {

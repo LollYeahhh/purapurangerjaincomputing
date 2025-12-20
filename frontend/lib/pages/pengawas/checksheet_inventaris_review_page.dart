@@ -3,6 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../models/user_model.dart';
 import '../../models/checksheet_review_model.dart';
 import '../../services/pengawas_checksheet_service.dart';
+import '../../services/pengawas_checksheet_service.dart';
+import '../../config/app_config.dart';
+import '../../utils/mock_checksheet_data.dart';
 
 class ChecksheetInventarisReviewPage extends StatefulWidget {
   final User user;
@@ -151,41 +154,77 @@ class _ChecksheetInventarisReviewPageState
 
     setState(() {
       _isLoading = true;
-      // PERBAIKAN 2: Hapus penggunaan _errorMessage
-      // _errorMessage = null; // <-- DIHAPUS
     });
 
     try {
+      // 🔥 COBA AMBIL DATA DARI API
       final data = await PengawasChecksheetService.getLaporanDetail(
         widget.user.token!,
         widget.laporanId,
       );
 
-      setState(() {
-        _reviewData = data;
-        _isLoading = false;
-      });
-    } catch (e) {
-      // JIKA GAGAL, GUNAKAN MOCK DATA UNTUK SIMULASI
-      print('Error loading data: $e');
-      print('Menggunakan mock data untuk simulasi...');
-
-      setState(() {
-        _reviewData = _getMockData();
-        _isLoading = false;
-        // PERBAIKAN 3: Hapus penggunaan _errorMessage
-        // _errorMessage = null; // <-- DIHAPUS
-      });
-
-      // Tampilkan snackbar info bahwa menggunakan data simulasi
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Menggunakan data simulasi'),
-            backgroundColor: Colors.blue,
-            duration: Duration(seconds: 2),
-          ),
-        );
+        setState(() {
+          _reviewData = data;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      // ✅ JIKA API GAGAL ATAU MODE SIMULASI AKTIF
+      if (AppConfig.isSimulationMode || e.toString().contains('API Error')) {
+        print('⚠️ API Error: $e');
+        print('📦 Mode Simulasi: Menggunakan mock data...');
+
+        if (mounted) {
+          setState(() {
+            _reviewData = MockChecksheetData.getMockInventaris(
+              widget.laporanId,
+            );
+            _isLoading = false;
+          });
+
+          // Tampilkan info bahwa sedang mode simulasi
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.info_outline, color: Colors.white, size: 20),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      '🔧 Mode Simulasi: Menggunakan data contoh',
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              backgroundColor: Colors.blue.shade600,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              margin: const EdgeInsets.all(16),
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      } else {
+        // Error lain (bukan API error)
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error: $e'),
+              backgroundColor: Colors.red.shade600,
+            ),
+          );
+        }
       }
     }
   }

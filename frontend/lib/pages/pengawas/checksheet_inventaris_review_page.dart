@@ -3,9 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../models/user_model.dart';
 import '../../models/checksheet_review_model.dart';
 import '../../services/pengawas_checksheet_service.dart';
-import '../../services/pengawas_checksheet_service.dart';
 import '../../config/app_config.dart';
 import '../../utils/mock_checksheet_data.dart';
+import 'checksheet_komponen_review_page.dart'; // ✅ Import page baru
 
 class ChecksheetInventarisReviewPage extends StatefulWidget {
   final User user;
@@ -41,8 +41,6 @@ class _ChecksheetInventarisReviewPageState
   bool _isRejecting = false;
 
   ChecksheetReviewModel? _reviewData;
-  // PERBAIKAN 1: Hapus deklarasi _errorMessage karena tidak digunakan
-  // String? _errorMessage; // <-- DIHAPUS
 
   String _currentSheet = 'Tool Box';
 
@@ -80,75 +78,6 @@ class _ChecksheetInventarisReviewPageState
     super.dispose();
   }
 
-  // MOCK DATA untuk simulasi
-  ChecksheetReviewModel _getMockData() {
-    return ChecksheetReviewModel(
-      laporanId: widget.laporanId,
-      noKa: widget.noKa ?? 'KRD-123',
-      namaKa: widget.namaKa ?? 'Argo Bromo Anggrek',
-      namaMekanik: widget.namaMekanik ?? 'Budi Santoso',
-      status: 'Pending Approval',
-      submittedAt: widget.submittedAt ?? DateTime.now().toString(),
-      sheets: {
-        'tool_box': [
-          {
-            'item_pemeriksaan': 'Tang Kombinasi',
-            'standar': '2',
-            'kondisi': 'BAIK',
-            'jumlah': '2',
-            'keterangan': 'Lengkap dan berfungsi dengan baik',
-          },
-          {
-            'item_pemeriksaan': 'Obeng Plus',
-            'standar': '3',
-            'kondisi': 'BAIK',
-            'jumlah': '3',
-            'keterangan': 'Semua dalam kondisi baik',
-          },
-          {
-            'item_pemeriksaan': 'Obeng Minus',
-            'standar': '3',
-            'kondisi': 'BAIK',
-            'jumlah': '3',
-            'keterangan': '',
-          },
-          {
-            'item_pemeriksaan': 'Kunci Inggris',
-            'standar': '1',
-            'kondisi': 'BAIK',
-            'jumlah': '1',
-            'keterangan': 'Berfungsi normal',
-          },
-        ],
-        'tool_kit': [
-          {
-            'item_pemeriksaan': 'Kunci Ring Set',
-            'standar': '1 Set',
-            'kondisi': 'BAIK',
-            'jumlah': '1 Set',
-            'keterangan': 'Lengkap semua ukuran',
-          },
-          {
-            'item_pemeriksaan': 'Kunci Sok Set',
-            'standar': '1 Set',
-            'kondisi': 'BAIK',
-            'jumlah': '1 Set',
-            'keterangan': '',
-          },
-          {
-            'item_pemeriksaan': 'Tang Potong',
-            'standar': '1',
-            'kondisi': 'BAIK',
-            'jumlah': '1',
-            'keterangan': 'Tajam dan berfungsi',
-          },
-        ],
-      },
-      catatanPengawas: null,
-      logGangguan: [],
-    );
-  }
-
   Future<void> _loadLaporanData() async {
     if (!mounted) return;
 
@@ -157,7 +86,6 @@ class _ChecksheetInventarisReviewPageState
     });
 
     try {
-      // 🔥 COBA AMBIL DATA DARI API
       final data = await PengawasChecksheetService.getLaporanDetail(
         widget.user.token!,
         widget.laporanId,
@@ -170,7 +98,6 @@ class _ChecksheetInventarisReviewPageState
         });
       }
     } catch (e) {
-      // ✅ JIKA API GAGAL ATAU MODE SIMULASI AKTIF
       if (AppConfig.isSimulationMode || e.toString().contains('API Error')) {
         print('⚠️ API Error: $e');
         print('📦 Mode Simulasi: Menggunakan mock data...');
@@ -183,7 +110,6 @@ class _ChecksheetInventarisReviewPageState
             _isLoading = false;
           });
 
-          // Tampilkan info bahwa sedang mode simulasi
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Row(
@@ -212,7 +138,6 @@ class _ChecksheetInventarisReviewPageState
           );
         }
       } else {
-        // Error lain (bukan API error)
         if (mounted) {
           setState(() {
             _isLoading = false;
@@ -250,6 +175,29 @@ class _ChecksheetInventarisReviewPageState
     }
   }
 
+  // ✅ Handler untuk navigasi tab
+  void _handleTabChange(String sheetName) {
+    // ✅ Jika tab Mekanik atau Genset, redirect ke ChecksheetKomponenReviewPage
+    if (sheetName == 'Mekanik' || sheetName == 'Genset') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ChecksheetKomponenReviewPage(
+            user: widget.user,
+            laporanId: widget.laporanId,
+            initialSheet: sheetName.toLowerCase(),
+          ),
+        ),
+      );
+      return;
+    }
+
+    // ✅ Untuk tab lain (Tool Box, Tool Kit, dll), update state biasa
+    setState(() {
+      _currentSheet = sheetName;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -260,7 +208,7 @@ class _ChecksheetInventarisReviewPageState
           _buildBackButton(),
           if (_isLoading)
             const Expanded(child: Center(child: CircularProgressIndicator()))
-          else ...[
+          else ..[
             _buildLaporanInfoCard(),
             _buildSheetTabs(),
             _buildSheetTitle(),
@@ -582,11 +530,7 @@ class _ChecksheetInventarisReviewPageState
           final isSelected = _currentSheet == sheet['name'];
 
           return GestureDetector(
-            onTap: () {
-              setState(() {
-                _currentSheet = sheet['name'];
-              });
-            },
+            onTap: () => _handleTabChange(sheet['name']), // ✅ Gunakan handler baru
             child: Container(
               margin: const EdgeInsets.only(right: 8.0),
               padding: const EdgeInsets.symmetric(
@@ -882,7 +826,6 @@ class _ChecksheetInventarisReviewPageState
 
     return Column(
       children: [
-        // Tombol Approve
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
@@ -923,7 +866,6 @@ class _ChecksheetInventarisReviewPageState
           ),
         ),
         const SizedBox(height: 12.0),
-        // Tombol Reject
         SizedBox(
           width: double.infinity,
           child: OutlinedButton(
@@ -966,7 +908,6 @@ class _ChecksheetInventarisReviewPageState
     );
   }
 
-  // PERBAIKAN 4: Hapus semua parameter logGangguan
   Future<void> _handleApprove() async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -1184,7 +1125,6 @@ class _ChecksheetInventarisReviewPageState
     }
   }
 
-  // PERBAIKAN 5: Hapus semua parameter logGangguan
   Future<void> _handleReject() async {
     final controller = TextEditingController();
 

@@ -418,7 +418,11 @@ class _ChecksheetKomponenReviewPageState
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        Icon(Icons.person, size: 14, color: Colors.grey.shade600),
+                        Icon(
+                          Icons.person,
+                          size: 14,
+                          color: Colors.grey.shade600,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           _reviewData!.namaMekanik,
@@ -449,7 +453,8 @@ class _ChecksheetKomponenReviewPageState
             children:
                 _sheets.map((sheet) {
                   final isActive = _currentSheet == sheet['name'];
-                  final isApproved = _sheetApprovalStatus[sheet['name']] ?? false;
+                  final isApproved =
+                      _sheetApprovalStatus[sheet['name']] ?? false;
 
                   return Expanded(
                     child: GestureDetector(
@@ -472,9 +477,7 @@ class _ChecksheetKomponenReviewPageState
                         ),
                         decoration: BoxDecoration(
                           color:
-                              isActive
-                                  ? const Color(0xFF2196F3)
-                                  : Colors.white,
+                              isActive ? const Color(0xFF2196F3) : Colors.white,
                           borderRadius: BorderRadius.circular(12.0),
                           border: Border.all(
                             color:
@@ -519,7 +522,7 @@ class _ChecksheetKomponenReviewPageState
                                         : const Color(0xFF2C2A6B),
                               ),
                             ),
-                            if (isApproved) ..[
+                            if (isApproved) ...[
                               const SizedBox(width: 6),
                               Icon(
                                 Icons.check_circle,
@@ -602,11 +605,7 @@ class _ChecksheetKomponenReviewPageState
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.folder_open,
-            size: 18,
-            color: const Color(0xFF2196F3),
-          ),
+          Icon(Icons.folder_open, size: 18, color: const Color(0xFF2196F3)),
           const SizedBox(width: 8),
           Text(
             kategori,
@@ -737,7 +736,7 @@ class _ChecksheetKomponenReviewPageState
           ),
 
           // Keterangan (jika ada)
-          if (keterangan.isNotEmpty) ..[
+          if (keterangan.isNotEmpty) ...[
             const SizedBox(height: 12),
             Container(
               width: double.infinity,
@@ -814,7 +813,8 @@ class _ChecksheetKomponenReviewPageState
           // Reject Button
           Expanded(
             child: ElevatedButton.icon(
-              onPressed: _isApproving || _isRejecting ? null : _handleRejectSheet,
+              onPressed:
+                  _isApproving || _isRejecting ? null : _handleRejectSheet,
               icon:
                   _isRejecting
                       ? const SizedBox(
@@ -850,7 +850,8 @@ class _ChecksheetKomponenReviewPageState
           // Approve Button
           Expanded(
             child: ElevatedButton.icon(
-              onPressed: _isApproving || _isRejecting ? null : _handleApproveSheet,
+              onPressed:
+                  _isApproving || _isRejecting ? null : _handleApproveSheet,
               icon:
                   _isApproving
                       ? const SizedBox(
@@ -897,10 +898,7 @@ class _ChecksheetKomponenReviewPageState
           const SizedBox(height: 16),
           Text(
             'Tidak ada data untuk sheet ini',
-            style: GoogleFonts.inter(
-              fontSize: 16,
-              color: Colors.grey.shade600,
-            ),
+            style: GoogleFonts.inter(fontSize: 16, color: Colors.grey.shade600),
           ),
         ],
       ),
@@ -1146,9 +1144,7 @@ class _ChecksheetKomponenReviewPageState
                 onPressed: () {
                   if (controller.text.trim().isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Alasan wajib diisi'),
-                      ),
+                      const SnackBar(content: Text('Alasan wajib diisi')),
                     );
                     return;
                   }

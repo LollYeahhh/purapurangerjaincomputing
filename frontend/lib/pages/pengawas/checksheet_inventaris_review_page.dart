@@ -671,22 +671,258 @@ class _ChecksheetInventarisReviewPageState
     return _buildEmptyState();
   }
 
-  // ✅ Section untuk Mekanik 2 & Elektrik (list gerbong)
+  // ✅ Section untuk Mekanik 2 & Elektrik (list gerbong) - UPDATED
   Widget _buildGerbongListSection(String key) {
-    // TODO: Implement dari mock data - list gerbong yang diperbaiki
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          children: [
-            Icon(Icons.train, size: 64, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            Text(
-              'Fitur list gerbong akan segera hadir',
-              style: GoogleFonts.inter(color: Colors.grey[600], fontSize: 14),
-            ),
-          ],
+    final sheetData = _reviewData!.sheets[key];
+
+    if (sheetData == null || sheetData is! Map<String, dynamic>) {
+      return _buildEmptyState();
+    }
+
+    final gerbongList = sheetData['gerbong_list'] as List<dynamic>?;
+
+    if (gerbongList == null || gerbongList.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header info
+        Container(
+          padding: const EdgeInsets.all(12.0),
+          margin: const EdgeInsets.only(bottom: 16.0),
+          decoration: BoxDecoration(
+            color: Colors.blue.shade50,
+            borderRadius: BorderRadius.circular(8.0),
+            border: Border.all(color: Colors.blue.shade200),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.train, color: Colors.blue.shade700, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Daftar gerbong yang sudah diperiksa oleh Mekanik',
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    color: Colors.blue.shade900,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
+        // List gerbong
+        ...gerbongList.map((gerbong) {
+          return _buildGerbongCard(gerbong as Map<String, dynamic>);
+        }).toList(),
+      ],
+    );
+  }
+
+  // ✅ Card untuk setiap gerbong
+  Widget _buildGerbongCard(Map<String, dynamic> gerbong) {
+    final gerbongId = gerbong['gerbong_id'] ?? '';
+    final namaGerbong = gerbong['nama_gerbong'] ?? '';
+    final status = gerbong['status'] ?? '';
+    final jumlahItem = gerbong['jumlah_item'] ?? 0;
+    final itemSelesai = gerbong['item_selesai'] ?? 0;
+    final catatan = gerbong['catatan'] ?? '';
+
+    // Status color
+    Color statusColor;
+    IconData statusIcon;
+
+    if (status == 'Selesai Diperbaiki') {
+      statusColor = Colors.green;
+      statusIcon = Icons.check_circle;
+    } else if (status == 'Dalam Perbaikan') {
+      statusColor = Colors.orange;
+      statusIcon = Icons.pending;
+    } else {
+      statusColor = Colors.red;
+      statusIcon = Icons.warning;
+    }
+
+    // Progress percentage
+    final progress = jumlahItem > 0 ? (itemSelesai / jumlahItem) : 0.0;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.0),
+        border: Border.all(color: statusColor.withOpacity(0.3), width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header gerbong
+          Container(
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: statusColor.withOpacity(0.1),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(10.0),
+                topRight: Radius.circular(10.0),
+              ),
+            ),
+            child: Row(
+              children: [
+                // Gerbong icon
+                Container(
+                  padding: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    color: statusColor.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: Icon(
+                    Icons.train,
+                    color: statusColor,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Gerbong info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        gerbongId,
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        namaGerbong,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: Colors.grey.shade700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Status badge
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: statusColor,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        statusIcon,
+                        color: Colors.white,
+                        size: 14,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        status,
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Progress & detail
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Progress bar
+                Row(
+                  children: [
+                    Text(
+                      'Progress Pemeriksaan:',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      '$itemSelesai/$jumlahItem',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: statusColor,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    backgroundColor: Colors.grey.shade200,
+                    valueColor: AlwaysStoppedAnimation<Color>(statusColor),
+                    minHeight: 8,
+                  ),
+                ),
+                // Catatan
+                if (catatan.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.note_alt_outlined,
+                          size: 16,
+                          color: Colors.grey.shade600,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            catatan,
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: Colors.grey.shade800,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

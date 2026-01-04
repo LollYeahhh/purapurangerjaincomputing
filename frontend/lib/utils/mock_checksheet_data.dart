@@ -79,7 +79,7 @@ class MockChecksheetData {
     );
   }
 
-  /// Generate mock data untuk Mekanik & Genset (Format Tipe 2)
+  /// Generate mock data untuk Mekanik & Genset
   static ChecksheetReviewModel getMockKomponen(int laporanId) {
     return ChecksheetReviewModel(
       laporanId: laporanId,
@@ -91,268 +91,290 @@ class MockChecksheetData {
           DateTime.now().subtract(const Duration(hours: 2)).toIso8601String(),
       catatanPengawas: null,
       sheets: {
-        'mekanik': [
-          {'kategori': 'SISTEM REM'},
-          {
-            'item_pemeriksaan': 'Tekanan Udara Utama',
-            'standar': '7-9 Bar',
-            'hasil_input': '8.2',
-            'satuan': 'Bar',
-          },
-          {
-            'item_pemeriksaan': 'Kondisi Brake Cylinder',
-            'standar': 'Tidak Bocor',
-            'hasil_input': 'Tidak Bocor',
-            'satuan': '',
-          },
-          {
-            'item_pemeriksaan': 'Ketebalan Kampas Rem',
-            'standar': '≥ 5',
-            'hasil_input': '6.5',
-            'satuan': 'mm',
-          },
-
-          {'kategori': 'SISTEM SUSPENSI'},
-          {
-            'item_pemeriksaan': 'Kondisi Air Spring',
-            'standar': 'Tidak Bocor',
-            'hasil_input': 'Tidak Bocor',
-            'satuan': '',
-          },
-          {
-            'item_pemeriksaan': 'Tekanan Air Spring',
-            'standar': '4-6 Bar',
-            'hasil_input': '5.1',
-            'satuan': 'Bar',
-          },
-
-          {'kategori': 'SISTEM RODA'},
-          {
-            'item_pemeriksaan': 'Kondisi Bearing',
-            'standar': 'Tidak Bunyi',
-            'hasil_input': 'Normal',
-            'satuan': '',
-          },
-          {
-            'item_pemeriksaan': 'Play Roda',
-            'standar': '< 1',
-            'hasil_input': '0.5',
-            'satuan': 'mm',
-          },
-        ],
-        'genset': [
-          {'kategori': 'MESIN GENSET'},
-          {
-            'item_pemeriksaan': 'Tegangan Output',
-            'standar': '380-400',
-            'hasil_input': '395',
-            'satuan': 'V',
-          },
-          {
-            'item_pemeriksaan': 'Frekuensi',
-            'standar': '50',
-            'hasil_input': '50',
-            'satuan': 'Hz',
-          },
-          {
-            'item_pemeriksaan': 'Tekanan Oli',
-            'standar': '3-5',
-            'hasil_input': '4.2',
-            'satuan': 'Bar',
-          },
-          {
-            'item_pemeriksaan': 'Suhu Air Pendingin',
-            'standar': '< 90',
-            'hasil_input': '78',
-            'satuan': '°C',
-          },
-
-          {'kategori': 'SISTEM PENDINGINAN'},
-          {
-            'item_pemeriksaan': 'Level Air Radiator',
-            'standar': 'Normal',
-            'hasil_input': 'Normal',
-            'satuan': '',
-          },
-          {
-            'item_pemeriksaan': 'Kondisi Kipas',
-            'standar': 'Berfungsi',
-            'hasil_input': 'Berfungsi',
-            'satuan': '',
-          },
-        ],
-      },
-      logGangguan: [
-        {
-          'tanggal': '2025-12-17',
-          'jenis_gangguan': 'Sistem Rem',
-          'deskripsi': 'Tekanan udara sempat drop ke 6.5 Bar',
-          'tindakan': 'Dicek kebocoran, tidak ditemukan masalah',
-          'status': 'Resolved',
+        'mekanik': {
+          'kategori': [
+            {
+              'nama_kategori': 'ALAT TOLAK TARIK',
+              'items': [
+                {
+                  'item_pemeriksaan': 'a. Kopler Mekanik',
+                  'standar': 'Lengkap',
+                  'hasil_input': 'LENGKAP',
+                  'keterangan': 'Dalam kondisi baik',
+                },
+                {
+                  'item_pemeriksaan': 'b. Selisih Tinggi Buffer',
+                  'standar': 'Baik/Utuh',
+                  'hasil_input': 'BAIK',
+                  'keterangan': 'Tidak ada kerusakan',
+                },
+                {
+                  'item_pemeriksaan': 'c. Klaw dan Pen Klaw',
+                  'standar': 'Baik',
+                  'hasil_input': 'BAIK',
+                  'keterangan': 'Berfungsi normal',
+                },
+              ],
+            },
+            {
+              'nama_kategori': 'BOGIE & PERANGKATNYA',
+              'items': [
+                {
+                  'item_pemeriksaan': 'a. Pegas Daun/ Primer/ Sekunder',
+                  'standar': 'Baik',
+                  'hasil_input': 'BAIK',
+                  'keterangan': 'Elastisitas normal',
+                },
+                {
+                  'item_pemeriksaan': 'b. Bantalan Gandar/ Bearing Axlebox',
+                  'standar': 'Baik/Utuh',
+                  'hasil_input': 'BAIK',
+                  'keterangan': 'Tidak ada kebocoran',
+                },
+              ],
+            },
+            {
+              'nama_kategori': 'PENGEREMAN',
+              'items': [
+                {
+                  'item_pemeriksaan': 'a. Tekanan Udara Pengereman',
+                  'standar': '4.8 - 5.2 Kg/cm²',
+                  'hasil_input': '5.0',
+                  'keterangan': 'Tekanan stabil',
+                },
+                {
+                  'item_pemeriksaan': 'b. Kebocoran Saluran Pengereman',
+                  'standar': 'Baik',
+                  'hasil_input': 'BAIK',
+                  'keterangan': 'Tidak ada kebocoran',
+                },
+              ],
+            },
+          ],
         },
-      ],
-    );
-  }
-
-  /// Generate mock data untuk Gerbong Fase
-  static ChecksheetReviewModel getMockGerbong(int laporanId) {
-    return ChecksheetReviewModel(
-      laporanId: laporanId,
-      noKa: 'KA-15',
-      namaKa: 'Argo Dwipangga',
-      status: 'Pending Approval',
-      namaMekanik: 'Gilang Yanuar',
-      submittedAt:
-          DateTime.now().subtract(const Duration(hours: 3)).toIso8601String(),
-      catatanPengawas: null,
-      sheets: {
-        'gerbong_fase': [
+        'genset': {
+          'kategori': [
+            {
+              'nama_kategori': 'KONDISI GENSET AWAL',
+              'items': [
+                {
+                  'item_pemeriksaan': 'a. Bocoran/ Tetesan Pelumas, air, HSD',
+                  'standar': 'Tidak Ada',
+                  'hasil_input': 'TIDAK_ADA',
+                  'keterangan': 'Bersih',
+                },
+                {
+                  'item_pemeriksaan': 'b. HSD didalam pipa ukur',
+                  'standar': 'Cukup',
+                  'hasil_input': 'CUKUP',
+                  'keterangan': 'Level normal',
+                },
+              ],
+            },
+            {
+              'nama_kategori': 'MENGHIDUPKAN GENSET',
+              'items': [
+                {
+                  'item_pemeriksaan': 'a. Tekanan Pelumas',
+                  'standar': '2,5 - 6 Bar',
+                  'hasil_input': '4.2',
+                  'keterangan': 'Normal',
+                },
+                {
+                  'item_pemeriksaan': 'e. Frekuensi genset tanpa beban',
+                  'standar': '48 - 51 Hz',
+                  'hasil_input': '50',
+                  'keterangan': 'Stabil',
+                },
+              ],
+            },
+          ],
+        },
+        // ✅ DATA BARU: Mekanik 2 Per Gerbong
+        'mekanik2_gerbong': [
           {
-            'fase': 'Fase 1',
-            'no_gerbong': 'G-101',
-            'kondisi_umum': 'BAIK',
-            'catatan': 'Semua sistem normal',
+            'gerbong_id': 'KMP-101',
+            'nama_gerbong': 'Gerbong 1',
+            'jumlah_item': 15,
+            'status': 'Sudah diperiksa',
+            'items': [
+              {
+                'item_pemeriksaan': 'Pintu Masuk',
+                'hasil_input': 'BAIK',
+                'keterangan': 'Berfungsi normal',
+              },
+              {
+                'item_pemeriksaan': 'Pintu Keluar Darurat',
+                'hasil_input': 'BAIK',
+                'keterangan': 'Terkunci dengan baik',
+              },
+              {
+                'item_pemeriksaan': 'Jendela Kaca',
+                'hasil_input': 'BAIK',
+                'keterangan': 'Tidak ada retakan',
+              },
+              {
+                'item_pemeriksaan': 'Tempat Duduk',
+                'hasil_input': 'BAIK',
+                'keterangan': 'Bersih dan kokoh',
+              },
+              {
+                'item_pemeriksaan': 'Sandaran Tangan',
+                'hasil_input': 'BAIK',
+                'keterangan': 'Semua terpasang',
+              },
+            ],
           },
           {
-            'fase': 'Fase 1',
-            'no_gerbong': 'G-102',
-            'kondisi_umum': 'BAIK',
-            'catatan': 'Pendingin AC perlu dibersihkan',
+            'gerbong_id': 'KMP-102',
+            'nama_gerbong': 'Gerbong 2',
+            'jumlah_item': 15,
+            'status': 'Sudah diperiksa',
+            'items': [
+              {
+                'item_pemeriksaan': 'Pintu Masuk',
+                'hasil_input': 'RUSAK',
+                'keterangan': 'Engsel agak longgar, perlu dikencangkan',
+              },
+              {
+                'item_pemeriksaan': 'Pintu Keluar Darurat',
+                'hasil_input': 'BAIK',
+                'keterangan': 'Normal',
+              },
+              {
+                'item_pemeriksaan': 'Jendela Kaca',
+                'hasil_input': 'BAIK',
+                'keterangan': 'Bersih',
+              },
+              {
+                'item_pemeriksaan': 'Tempat Duduk',
+                'hasil_input': 'BAIK',
+                'keterangan': 'Kondisi baik',
+              },
+            ],
           },
           {
-            'fase': 'Fase 2',
-            'no_gerbong': 'G-201',
-            'kondisi_umum': 'PERLU PERHATIAN',
-            'catatan': 'Pintu otomatis agak lambat',
+            'gerbong_id': 'KMP-103',
+            'nama_gerbong': 'Gerbong 3',
+            'jumlah_item': 15,
+            'status': 'Sudah diperiksa',
+            'items': [
+              {
+                'item_pemeriksaan': 'Pintu Masuk',
+                'hasil_input': 'BAIK',
+                'keterangan': 'Normal',
+              },
+              {
+                'item_pemeriksaan': 'Pintu Keluar Darurat',
+                'hasil_input': 'BAIK',
+                'keterangan': 'Terkunci',
+              },
+            ],
+          },
+        ],
+        // ✅ DATA BARU: Elektrik Per Gerbong
+        'elektrik_gerbong': [
+          {
+            'gerbong_id': 'KMP-101',
+            'nama_gerbong': 'Gerbong 1',
+            'jumlah_item': 12,
+            'status': 'Sudah diperiksa',
+            'items': [
+              {
+                'item_pemeriksaan': 'Lampu Utama',
+                'hasil_input': 'BAIK',
+                'keterangan': 'Semua menyala',
+              },
+              {
+                'item_pemeriksaan': 'Lampu Emergency',
+                'hasil_input': 'BAIK',
+                'keterangan': 'Tested - berfungsi',
+              },
+              {
+                'item_pemeriksaan': 'AC Unit',
+                'hasil_input': 'BAIK',
+                'keterangan': 'Dingin optimal',
+              },
+              {
+                'item_pemeriksaan': 'Stop Kontak',
+                'hasil_input': 'BAIK',
+                'keterangan': 'Semua berfungsi',
+              },
+            ],
           },
           {
-            'fase': 'Fase 2',
-            'no_gerbong': 'G-202',
-            'kondisi_umum': 'BAIK',
-            'catatan': 'Semua sistem normal',
+            'gerbong_id': 'KMP-102',
+            'nama_gerbong': 'Gerbong 2',
+            'jumlah_item': 12,
+            'status': 'Sudah diperiksa',
+            'items': [
+              {
+                'item_pemeriksaan': 'Lampu Utama',
+                'hasil_input': 'RUSAK',
+                'keterangan': '2 lampu mati, perlu diganti',
+              },
+              {
+                'item_pemeriksaan': 'Lampu Emergency',
+                'hasil_input': 'BAIK',
+                'keterangan': 'Berfungsi',
+              },
+              {
+                'item_pemeriksaan': 'AC Unit',
+                'hasil_input': 'BAIK',
+                'keterangan': 'Normal',
+              },
+            ],
+          },
+          {
+            'gerbong_id': 'KMP-103',
+            'nama_gerbong': 'Gerbong 3',
+            'jumlah_item': 12,
+            'status': 'Sudah diperiksa',
+            'items': [
+              {
+                'item_pemeriksaan': 'Lampu Utama',
+                'hasil_input': 'BAIK',
+                'keterangan': 'Semua normal',
+              },
+              {
+                'item_pemeriksaan': 'AC Unit',
+                'hasil_input': 'BAIK',
+                'keterangan': 'Dingin',
+              },
+            ],
+          },
+        ],
+        // ✅ DATA BARU: Gangguan
+        'gangguan': [
+          {
+            'id': 1,
+            'waktu': '2025-01-04 10:30',
+            'gerbong': 'KMP-102',
+            'deskripsi': 'AC Gerbong 2 tidak dingin',
+            'solusi':
+                'Dilakukan pengecekan freon, ditemukan kebocoran pada pipa. Sudah ditambal sementara.',
+            'status': 'Selesai',
+          },
+          {
+            'id': 2,
+            'waktu': '2025-01-04 11:15',
+            'gerbong': 'KMP-102',
+            'deskripsi': 'Pintu otomatis lambat menutup',
+            'solusi':
+                'Dilakukan adjustment pada motor pintu dan pelumasan rel',
+            'status': 'Selesai',
+          },
+          {
+            'id': 3,
+            'waktu': '2025-01-04 14:20',
+            'gerbong': 'KMP-103',
+            'deskripsi': 'Lampu kabin sebelah kanan tidak menyala',
+            'solusi': 'Penggantian ballast lampu, sudah berfungsi normal',
+            'status': 'Selesai',
           },
         ],
       },
       logGangguan: [],
-    );
-  }
-
-  /// Generate mock data untuk Mekanik 2 (Format Tipe 3)
-  static ChecksheetReviewModel getMockMekanik2(int laporanId) {
-    return ChecksheetReviewModel(
-      laporanId: laporanId,
-      noKa: 'KA-15',
-      namaKa: 'Argo Dwipangga',
-      status: 'Pending Approval',
-      namaMekanik: 'Gilang Yanuar',
-      submittedAt:
-          DateTime.now().subtract(const Duration(hours: 2)).toIso8601String(),
-      catatanPengawas: null,
-      sheets: {
-        'mekanik_2': [
-          {'kategori': 'PEMERIKSAAN BOGIE'},
-          {
-            'item_pemeriksaan': 'Kondisi As Roda',
-            'hasil_pemeriksaan': 'BAIK',
-            'keterangan': 'Tidak ada keausan abnormal',
-          },
-          {
-            'item_pemeriksaan': 'Kondisi Primary Spring',
-            'hasil_pemeriksaan': 'BAIK',
-            'keterangan': 'Elastisitas normal',
-          },
-          {
-            'item_pemeriksaan': 'Kondisi Secondary Spring',
-            'hasil_pemeriksaan': 'PERLU PERHATIAN',
-            'keterangan': 'Ditemukan sedikit korosi, perlu dilumasi',
-          },
-
-          {'kategori': 'SISTEM KOPLING'},
-          {
-            'item_pemeriksaan': 'Kondisi Automatic Coupler',
-            'hasil_pemeriksaan': 'BAIK',
-            'keterangan': 'Fungsi normal',
-          },
-          {
-            'item_pemeriksaan': 'Kondisi Semi Permanent Coupler',
-            'hasil_pemeriksaan': 'BAIK',
-            'keterangan': 'Tidak ada kelonggaran',
-          },
-        ],
-      },
-      logGangguan: [],
-    );
-  }
-
-  /// Generate mock data untuk Electric (Format Tipe 3)
-  static ChecksheetReviewModel getMockElektrik(int laporanId) {
-    return ChecksheetReviewModel(
-      laporanId: laporanId,
-      noKa: 'KA-15',
-      namaKa: 'Argo Dwipangga',
-      status: 'Pending Approval',
-      namaMekanik: 'Budi Santoso',
-      submittedAt:
-          DateTime.now().subtract(const Duration(hours: 1)).toIso8601String(),
-      catatanPengawas: null,
-      sheets: {
-        'electric': [
-          {'kategori': 'SISTEM KELISTRIKAN UTAMA'},
-          {
-            'item_pemeriksaan': 'Tegangan Baterai',
-            'hasil_pemeriksaan': 'NORMAL',
-            'keterangan': '24.5V - dalam range normal',
-          },
-          {
-            'item_pemeriksaan': 'Kondisi MCB',
-            'hasil_pemeriksaan': 'BAIK',
-            'keterangan': 'Semua MCB berfungsi',
-          },
-          {
-            'item_pemeriksaan': 'Kondisi Kabel Power',
-            'hasil_pemeriksaan': 'BAIK',
-            'keterangan': 'Tidak ada kerusakan isolasi',
-          },
-
-          {'kategori': 'SISTEM PENCAHAYAAN'},
-          {
-            'item_pemeriksaan': 'Lampu Utama',
-            'hasil_pemeriksaan': 'BAIK',
-            'keterangan': 'Semua berfungsi',
-          },
-          {
-            'item_pemeriksaan': 'Lampu Kabin',
-            'hasil_pemeriksaan': 'PERLU PERBAIKAN',
-            'keterangan': '1 lampu mati di kabin 3, perlu ganti',
-          },
-          {
-            'item_pemeriksaan': 'Lampu Emergency',
-            'hasil_pemeriksaan': 'BAIK',
-            'keterangan': 'Tested - berfungsi normal',
-          },
-
-          {'kategori': 'SISTEM HVAC'},
-          {
-            'item_pemeriksaan': 'Kondisi AC Unit 1',
-            'hasil_pemeriksaan': 'BAIK',
-            'keterangan': 'Pendinginan optimal',
-          },
-          {
-            'item_pemeriksaan': 'Kondisi AC Unit 2',
-            'hasil_pemeriksaan': 'BAIK',
-            'keterangan': 'Pendinginan optimal',
-          },
-        ],
-      },
-      logGangguan: [
-        {
-          'tanggal': '2025-12-16',
-          'jenis_gangguan': 'Sistem Pencahayaan',
-          'deskripsi': 'Lampu kabin 3 mati',
-          'tindakan': 'Akan diganti pada maintenance berikutnya',
-          'status': 'Pending',
-        },
-      ],
     );
   }
 
@@ -367,18 +389,10 @@ class MockChecksheetData {
       case 'komponen':
       case 'mekanik':
       case 'genset':
+      case 'mekanik2_gerbong':
+      case 'elektrik_gerbong':
+      case 'gangguan':
         return getMockKomponen(laporanId);
-
-      case 'gerbong':
-      case 'gerbong_fase':
-        return getMockGerbong(laporanId);
-
-      case 'mekanik_2':
-        return getMockMekanik2(laporanId);
-
-      case 'electric':
-      case 'elektrik':
-        return getMockElektrik(laporanId);
 
       default:
         return getMockInventaris(laporanId);

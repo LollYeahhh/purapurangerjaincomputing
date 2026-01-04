@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../models/user_model.dart';
 import '../../models/checksheet_review_model.dart';
 import '../../services/pengawas_checksheet_service.dart';
-import '../../services/pengawas_checksheet_service.dart';
 import '../../config/app_config.dart';
 import '../../utils/mock_checksheet_data.dart';
 
@@ -41,19 +40,18 @@ class _ChecksheetInventarisReviewPageState
   bool _isRejecting = false;
 
   ChecksheetReviewModel? _reviewData;
-  // PERBAIKAN 1: Hapus deklarasi _errorMessage karena tidak digunakan
-  // String? _errorMessage; // <-- DIHAPUS
 
   String _currentSheet = 'Tool Box';
 
+  // ✅ Semua tabs dalam 1 page
   final List<Map<String, dynamic>> _sheets = [
-    {'name': 'Tool Box', 'icon': Icons.construction},
-    {'name': 'Tool Kit', 'icon': Icons.build},
-    {'name': 'Mekanik', 'icon': Icons.engineering},
-    {'name': 'Genset', 'icon': Icons.electrical_services},
-    {'name': 'Mekanik 2', 'icon': Icons.settings},
-    {'name': 'Elektrik', 'icon': Icons.bolt},
-    {'name': 'Gangguan', 'icon': Icons.warning},
+    {'name': 'Tool Box', 'key': 'tool_box', 'icon': Icons.construction},
+    {'name': 'Tool Kit', 'key': 'tool_kit', 'icon': Icons.build},
+    {'name': 'Mekanik', 'key': 'mekanik', 'icon': Icons.engineering},
+    {'name': 'Genset', 'key': 'genset', 'icon': Icons.electrical_services},
+    {'name': 'Mekanik 2', 'key': 'mekanik_2', 'icon': Icons.settings},
+    {'name': 'Elektrik', 'key': 'elektrik', 'icon': Icons.bolt},
+    {'name': 'Gangguan', 'key': 'gangguan', 'icon': Icons.warning},
   ];
 
   @override
@@ -80,75 +78,6 @@ class _ChecksheetInventarisReviewPageState
     super.dispose();
   }
 
-  // MOCK DATA untuk simulasi
-  ChecksheetReviewModel _getMockData() {
-    return ChecksheetReviewModel(
-      laporanId: widget.laporanId,
-      noKa: widget.noKa ?? 'KRD-123',
-      namaKa: widget.namaKa ?? 'Argo Bromo Anggrek',
-      namaMekanik: widget.namaMekanik ?? 'Budi Santoso',
-      status: 'Pending Approval',
-      submittedAt: widget.submittedAt ?? DateTime.now().toString(),
-      sheets: {
-        'tool_box': [
-          {
-            'item_pemeriksaan': 'Tang Kombinasi',
-            'standar': '2',
-            'kondisi': 'BAIK',
-            'jumlah': '2',
-            'keterangan': 'Lengkap dan berfungsi dengan baik',
-          },
-          {
-            'item_pemeriksaan': 'Obeng Plus',
-            'standar': '3',
-            'kondisi': 'BAIK',
-            'jumlah': '3',
-            'keterangan': 'Semua dalam kondisi baik',
-          },
-          {
-            'item_pemeriksaan': 'Obeng Minus',
-            'standar': '3',
-            'kondisi': 'BAIK',
-            'jumlah': '3',
-            'keterangan': '',
-          },
-          {
-            'item_pemeriksaan': 'Kunci Inggris',
-            'standar': '1',
-            'kondisi': 'BAIK',
-            'jumlah': '1',
-            'keterangan': 'Berfungsi normal',
-          },
-        ],
-        'tool_kit': [
-          {
-            'item_pemeriksaan': 'Kunci Ring Set',
-            'standar': '1 Set',
-            'kondisi': 'BAIK',
-            'jumlah': '1 Set',
-            'keterangan': 'Lengkap semua ukuran',
-          },
-          {
-            'item_pemeriksaan': 'Kunci Sok Set',
-            'standar': '1 Set',
-            'kondisi': 'BAIK',
-            'jumlah': '1 Set',
-            'keterangan': '',
-          },
-          {
-            'item_pemeriksaan': 'Tang Potong',
-            'standar': '1',
-            'kondisi': 'BAIK',
-            'jumlah': '1',
-            'keterangan': 'Tajam dan berfungsi',
-          },
-        ],
-      },
-      catatanPengawas: null,
-      logGangguan: [],
-    );
-  }
-
   Future<void> _loadLaporanData() async {
     if (!mounted) return;
 
@@ -157,7 +86,6 @@ class _ChecksheetInventarisReviewPageState
     });
 
     try {
-      // 🔥 COBA AMBIL DATA DARI API
       final data = await PengawasChecksheetService.getLaporanDetail(
         widget.user.token!,
         widget.laporanId,
@@ -170,7 +98,6 @@ class _ChecksheetInventarisReviewPageState
         });
       }
     } catch (e) {
-      // ✅ JIKA API GAGAL ATAU MODE SIMULASI AKTIF
       if (AppConfig.isSimulationMode || e.toString().contains('API Error')) {
         print('⚠️ API Error: $e');
         print('📦 Mode Simulasi: Menggunakan mock data...');
@@ -183,7 +110,6 @@ class _ChecksheetInventarisReviewPageState
             _isLoading = false;
           });
 
-          // Tampilkan info bahwa sedang mode simulasi
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Row(
@@ -212,7 +138,6 @@ class _ChecksheetInventarisReviewPageState
           );
         }
       } else {
-        // Error lain (bukan API error)
         if (mounted) {
           setState(() {
             _isLoading = false;
@@ -269,7 +194,7 @@ class _ChecksheetInventarisReviewPageState
                 controller: _listScrollController,
                 padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0),
                 children: [
-                  _buildInventarisSection(),
+                  _buildSheetContent(),
                   const SizedBox(height: 16.0),
                   _buildActionButtons(),
                   const SizedBox(height: 16.0),
@@ -586,6 +511,10 @@ class _ChecksheetInventarisReviewPageState
               setState(() {
                 _currentSheet = sheet['name'];
               });
+              // Scroll to top saat ganti tab
+              if (_listScrollController.hasClients) {
+                _listScrollController.jumpTo(0);
+              }
             },
             child: Container(
               margin: const EdgeInsets.only(right: 8.0),
@@ -659,26 +588,359 @@ class _ChecksheetInventarisReviewPageState
     );
   }
 
-  Widget _buildInventarisSection() {
+  // ✅ Router untuk konten berdasarkan tab yang dipilih
+  Widget _buildSheetContent() {
     if (_reviewData == null) return const SizedBox.shrink();
 
-    List<dynamic>? items;
-    if (_currentSheet == 'Tool Box') {
-      items = _reviewData!.sheets['tool_box'];
-    } else if (_currentSheet == 'Tool Kit') {
-      items = _reviewData!.sheets['tool_kit'];
+    final sheetKey = _sheets.firstWhere(
+      (s) => s['name'] == _currentSheet,
+      orElse: () => _sheets[0],
+    )['key'];
+
+    // Tool Box & Tool Kit (format lama - List)
+    if (sheetKey == 'tool_box' || sheetKey == 'tool_kit') {
+      return _buildInventarisSection(sheetKey);
     }
 
+    // Mekanik & Genset (format baru - Map dengan kategori)
+    if (sheetKey == 'mekanik' || sheetKey == 'genset') {
+      return _buildKategoriSection(sheetKey);
+    }
+
+    // Mekanik 2 & Elektrik (list gerbong)
+    if (sheetKey == 'mekanik_2' || sheetKey == 'elektrik') {
+      return _buildGerbongListSection(sheetKey);
+    }
+
+    // Gangguan
+    if (sheetKey == 'gangguan') {
+      return _buildGangguanSection();
+    }
+
+    return _buildEmptyState();
+  }
+
+  // ✅ Section untuk Tool Box & Tool Kit
+  Widget _buildInventarisSection(String key) {
+    final items = _reviewData!.sheets[key] as List<dynamic>?;
+
     if (items == null || items.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    return Column(
+      children:
+          items.map((item) {
+            final itemModel = InventarisReviewItemModel.fromJson(item);
+            return _buildInventarisItem(itemModel);
+          }).toList(),
+    );
+  }
+
+  // ✅ Section untuk Mekanik & Genset (dengan kategori)
+  Widget _buildKategoriSection(String key) {
+    final sheetData = _reviewData!.sheets[key];
+
+    if (sheetData == null) {
+      return _buildEmptyState();
+    }
+
+    if (sheetData is Map<String, dynamic>) {
+      final kategoriList = sheetData['kategori'] as List<dynamic>?;
+      if (kategoriList == null || kategoriList.isEmpty) {
+        return _buildEmptyState();
+      }
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: kategoriList.map((kategori) {
+          final namaKategori = kategori['nama_kategori'] ?? '';
+          final items = kategori['items'] as List<dynamic>? ?? [];
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildKategoriHeader(namaKategori),
+              ...items.map((item) => _buildKomponenItem(item)).toList(),
+            ],
+          );
+        }).toList(),
+      );
+    }
+
+    return _buildEmptyState();
+  }
+
+  // ✅ Section untuk Mekanik 2 & Elektrik (list gerbong) - UPDATED
+  Widget _buildGerbongListSection(String key) {
+    final sheetData = _reviewData!.sheets[key];
+
+    if (sheetData == null || sheetData is! Map<String, dynamic>) {
+      return _buildEmptyState();
+    }
+
+    final gerbongList = sheetData['gerbong_list'] as List<dynamic>?;
+
+    if (gerbongList == null || gerbongList.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header info
+        Container(
+          padding: const EdgeInsets.all(12.0),
+          margin: const EdgeInsets.only(bottom: 16.0),
+          decoration: BoxDecoration(
+            color: Colors.blue.shade50,
+            borderRadius: BorderRadius.circular(8.0),
+            border: Border.all(color: Colors.blue.shade200),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.train, color: Colors.blue.shade700, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Daftar gerbong yang sudah diperiksa oleh Mekanik',
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    color: Colors.blue.shade900,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        // List gerbong
+        ...gerbongList.map((gerbong) {
+          return _buildGerbongCard(gerbong as Map<String, dynamic>);
+        }).toList(),
+      ],
+    );
+  }
+
+  // ✅ Card untuk setiap gerbong
+  Widget _buildGerbongCard(Map<String, dynamic> gerbong) {
+    final gerbongId = gerbong['gerbong_id'] ?? '';
+    final namaGerbong = gerbong['nama_gerbong'] ?? '';
+    final status = gerbong['status'] ?? '';
+    final jumlahItem = gerbong['jumlah_item'] ?? 0;
+    final itemSelesai = gerbong['item_selesai'] ?? 0;
+    final catatan = gerbong['catatan'] ?? '';
+
+    // Status color
+    Color statusColor;
+    IconData statusIcon;
+
+    if (status == 'Selesai Diperbaiki') {
+      statusColor = Colors.green;
+      statusIcon = Icons.check_circle;
+    } else if (status == 'Dalam Perbaikan') {
+      statusColor = Colors.orange;
+      statusIcon = Icons.pending;
+    } else {
+      statusColor = Colors.red;
+      statusIcon = Icons.warning;
+    }
+
+    // Progress percentage
+    final progress = jumlahItem > 0 ? (itemSelesai / jumlahItem) : 0.0;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.0),
+        border: Border.all(color: statusColor.withOpacity(0.3), width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header gerbong
+          Container(
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: statusColor.withOpacity(0.1),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(10.0),
+                topRight: Radius.circular(10.0),
+              ),
+            ),
+            child: Row(
+              children: [
+                // Gerbong icon
+                Container(
+                  padding: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    color: statusColor.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: Icon(
+                    Icons.train,
+                    color: statusColor,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Gerbong info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        gerbongId,
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        namaGerbong,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: Colors.grey.shade700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Status badge
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: statusColor,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        statusIcon,
+                        color: Colors.white,
+                        size: 14,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        status,
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Progress & detail
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Progress bar
+                Row(
+                  children: [
+                    Text(
+                      'Progress Pemeriksaan:',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      '$itemSelesai/$jumlahItem',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: statusColor,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    backgroundColor: Colors.grey.shade200,
+                    valueColor: AlwaysStoppedAnimation<Color>(statusColor),
+                    minHeight: 8,
+                  ),
+                ),
+                // Catatan
+                if (catatan.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.note_alt_outlined,
+                          size: 16,
+                          color: Colors.grey.shade600,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            catatan,
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: Colors.grey.shade800,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ✅ Section untuk Gangguan
+  Widget _buildGangguanSection() {
+    final logGangguan = _reviewData!.logGangguan;
+
+    if (logGangguan.isEmpty) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(32.0),
           child: Column(
             children: [
-              Icon(Icons.inbox, size: 64, color: Colors.grey[400]),
+              Icon(Icons.check_circle, size: 64, color: Colors.green[400]),
               const SizedBox(height: 16),
               Text(
-                'Data $_currentSheet belum tersedia',
+                'Tidak ada gangguan yang dilaporkan',
                 style: GoogleFonts.inter(color: Colors.grey[600], fontSize: 14),
               ),
             ],
@@ -688,11 +950,223 @@ class _ChecksheetInventarisReviewPageState
     }
 
     return Column(
-      children:
-          items.map((item) {
-            final itemModel = InventarisReviewItemModel.fromJson(item);
-            return _buildInventarisItem(itemModel);
-          }).toList(),
+      children: logGangguan.map((gangguan) {
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12.0),
+          padding: const EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            color: Colors.red.shade50,
+            borderRadius: BorderRadius.circular(8.0),
+            border: Border.all(color: Colors.red.shade200),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.warning, color: Colors.red.shade700, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      gangguan['jenis_gangguan'] ?? 'Gangguan',
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.red.shade900,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                gangguan['deskripsi'] ?? '',
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  color: Colors.grey.shade800,
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  // ✅ Header kategori
+  Widget _buildKategoriHeader(String kategori) {
+    return Container(
+      margin: const EdgeInsets.only(top: 16.0, bottom: 12.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      decoration: BoxDecoration(
+        color: const Color(0xFF2196F3).withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12.0),
+        border: Border.all(color: const Color(0xFF2196F3), width: 1.5),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.folder_open,
+            size: 18,
+            color: const Color(0xFF2196F3),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            kategori,
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF2196F3),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ✅ Item komponen (Mekanik & Genset)
+  Widget _buildKomponenItem(Map<String, dynamic> item) {
+    final itemPemeriksaan = item['item_pemeriksaan'] ?? '';
+    final standar = item['standar'] ?? '';
+    final hasilInput = item['hasil_input'] ?? '';
+    final keterangan = item['keterangan'] ?? '';
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12.0),
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.0),
+        border: Border.all(color: const Color(0xFF2196F3).withOpacity(0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            itemPemeriksaan,
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFFE3F2FD),
+              borderRadius: BorderRadius.circular(8),
+              border: const Border(
+                bottom: BorderSide(color: Color(0xFF2196F3), width: 2),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Standar:',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF2196F3),
+                  ),
+                ),
+                Flexible(
+                  child: Text(
+                    standar,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF2196F3),
+                    ),
+                    textAlign: TextAlign.right,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.green.shade50,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.green.shade200),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.check_circle,
+                  size: 18,
+                  color: Colors.green.shade700,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Hasil: ',
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey.shade700,
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    hasilInput,
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.green.shade800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (keterangan.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Keterangan:',
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    keterangan,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: Colors.grey.shade800,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 
@@ -875,6 +1349,24 @@ class _ChecksheetInventarisReviewPageState
     );
   }
 
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          children: [
+            Icon(Icons.inbox, size: 64, color: Colors.grey[400]),
+            const SizedBox(height: 16),
+            Text(
+              'Data $_currentSheet belum tersedia',
+              style: GoogleFonts.inter(color: Colors.grey[600], fontSize: 14),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildActionButtons() {
     if (_reviewData == null || _reviewData!.status != 'Pending Approval') {
       return const SizedBox.shrink();
@@ -882,7 +1374,6 @@ class _ChecksheetInventarisReviewPageState
 
     return Column(
       children: [
-        // Tombol Approve
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
@@ -923,7 +1414,6 @@ class _ChecksheetInventarisReviewPageState
           ),
         ),
         const SizedBox(height: 12.0),
-        // Tombol Reject
         SizedBox(
           width: double.infinity,
           child: OutlinedButton(
@@ -966,7 +1456,6 @@ class _ChecksheetInventarisReviewPageState
     );
   }
 
-  // PERBAIKAN 4: Hapus semua parameter logGangguan
   Future<void> _handleApprove() async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -1184,7 +1673,6 @@ class _ChecksheetInventarisReviewPageState
     }
   }
 
-  // PERBAIKAN 5: Hapus semua parameter logGangguan
   Future<void> _handleReject() async {
     final controller = TextEditingController();
 

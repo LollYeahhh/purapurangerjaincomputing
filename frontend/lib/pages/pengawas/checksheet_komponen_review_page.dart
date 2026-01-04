@@ -44,6 +44,12 @@ class _ChecksheetKomponenReviewPageState
   bool _showRightArrow = false;
   double _scrollProgress = 0.0;
 
+  // Sheet approval tracking
+  final Map<String, bool> _sheetApprovalStatus = {
+    'mekanik': false,
+    'genset': false,
+  };
+
   // Sheet tabs
   final List<Map<String, dynamic>> _sheets = [
     {'name': 'mekanik', 'label': 'Mekanik', 'icon': Icons.build},
@@ -99,133 +105,9 @@ class _ChecksheetKomponenReviewPageState
     }
   }
 
-  /// Handle Approve
-  Future<void> _handleApprove() async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder:
-          (context) => AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(28),
-            ),
-            elevation: 8,
-            backgroundColor: Colors.white,
-            icon: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.green.shade50,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.check_circle_outline,
-                size: 48,
-                color: Colors.green.shade600,
-              ),
-            ),
-            title: Text(
-              'Setujui Laporan?',
-              style: GoogleFonts.inter(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF2C2A6B),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Anda akan menyetujui laporan ini.',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    color: Colors.grey.shade700,
-                    height: 1.5,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.amber.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.amber.shade300),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.info_outline,
-                        color: Colors.amber.shade700,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'Laporan yang disetujui tidak dapat diubah lagi.',
-                          style: GoogleFonts.inter(
-                            fontSize: 12,
-                            color: Colors.amber.shade900,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            actionsAlignment: MainAxisAlignment.center,
-            actionsPadding: const EdgeInsets.only(bottom: 20),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    side: BorderSide(color: Colors.grey.shade300),
-                  ),
-                ),
-                child: Text(
-                  'Batal',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey.shade700,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context, true),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green.shade600,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 12,
-                  ),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: Text(
-                  'Setujui',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
-          ),
-    );
-
+  /// Handle Approve untuk sheet tertentu
+  Future<void> _handleApproveSheet() async {
+    final confirm = await _showApproveDialog();
     if (confirm != true) return;
 
     if (!mounted) return;
@@ -235,245 +117,57 @@ class _ChecksheetKomponenReviewPageState
     });
 
     try {
-      await ApiService.approveLaporan(
-        widget.user.token ?? '',
-        widget.laporanId,
-      );
+      // TODO: Implementasi API untuk approve per sheet
+      await Future.delayed(const Duration(seconds: 1)); // Simulasi API call
 
       if (!mounted) return;
 
-      // Show success message
+      setState(() {
+        _sheetApprovalStatus[_currentSheet] = true;
+        _isApproving = false;
+      });
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.check_circle, color: Colors.white),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Laporan berhasil disetujui',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
+          content: Text(
+            'Sheet $_currentSheet berhasil disetujui',
+            style: GoogleFonts.inter(fontSize: 14),
           ),
           backgroundColor: Colors.green.shade600,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          duration: const Duration(seconds: 2),
         ),
       );
 
-      // Navigate back to dashboard
-      await Future.delayed(const Duration(milliseconds: 500));
-      if (mounted) {
-        Navigator.popUntil(context, (route) => route.isFirst);
+      // Cek apakah semua sheet sudah di-approve
+      if (_sheetApprovalStatus.values.every((approved) => approved)) {
+        _showAllApprovedDialog();
       }
     } catch (e) {
       if (!mounted) return;
 
+      setState(() {
+        _isApproving = false;
+      });
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Gagal menyetujui laporan: $e',
+            'Gagal menyetujui sheet: $e',
             style: GoogleFonts.inter(fontSize: 14),
           ),
           backgroundColor: Colors.red.shade600,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
         ),
       );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isApproving = false;
-        });
-      }
     }
   }
 
-  /// Handle Reject
-  Future<void> _handleReject() async {
-    final controller = TextEditingController();
-
-    final result = await showDialog<String>(
-      context: context,
-      barrierDismissible: false,
-      builder:
-          (context) => AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(28),
-            ),
-            elevation: 8,
-            backgroundColor: Colors.white,
-            icon: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.red.shade50,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.cancel_outlined,
-                size: 48,
-                color: Colors.red.shade600,
-              ),
-            ),
-            title: Text(
-              'Tolak Laporan?',
-              style: GoogleFonts.inter(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF2C2A6B),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Berikan alasan penolakan untuk Mekanik.',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    color: Colors.grey.shade700,
-                    height: 1.5,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.amber.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.amber.shade300),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.warning_amber,
-                        color: Colors.amber.shade700,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'Alasan harus jelas agar Mekanik dapat memperbaiki.',
-                          style: GoogleFonts.inter(
-                            fontSize: 12,
-                            color: Colors.amber.shade900,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: controller,
-                  maxLines: 4,
-                  style: GoogleFonts.inter(fontSize: 14),
-                  decoration: InputDecoration(
-                    hintText: 'Contoh: Data checksheet genset tidak lengkap...',
-                    hintStyle: GoogleFonts.inter(
-                      fontSize: 14,
-                      color: Colors.grey.shade400,
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey.shade50,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: Color(0xFF2C2A6B),
-                        width: 2,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            actionsAlignment: MainAxisAlignment.center,
-            actionsPadding: const EdgeInsets.only(bottom: 20),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, null),
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    side: BorderSide(color: Colors.grey.shade300),
-                  ),
-                ),
-                child: Text(
-                  'Batal',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey.shade700,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              ElevatedButton(
-                onPressed: () {
-                  final text = controller.text.trim();
-                  if (text.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Alasan penolakan wajib diisi',
-                          style: GoogleFonts.inter(fontSize: 14),
-                        ),
-                        backgroundColor: Colors.red.shade600,
-                      ),
-                    );
-                    return;
-                  }
-                  Navigator.pop(context, text);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red.shade600,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 12,
-                  ),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: Text(
-                  'Tolak',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
-          ),
-    );
-
-    if (result == null || result.isEmpty) return;
+  /// Handle Reject untuk sheet tertentu
+  Future<void> _handleRejectSheet() async {
+    final reason = await _showRejectDialog();
+    if (reason == null || reason.isEmpty) return;
 
     if (!mounted) return;
 
@@ -482,42 +176,30 @@ class _ChecksheetKomponenReviewPageState
     });
 
     try {
-      await ApiService.rejectLaporan(
-        widget.user.token ?? '',
-        widget.laporanId,
-        result,
-      );
+      // TODO: Implementasi API untuk reject per sheet dengan alasan
+      await Future.delayed(const Duration(seconds: 1)); // Simulasi API call
 
       if (!mounted) return;
 
-      // Show success message
+      setState(() {
+        _isRejecting = false;
+      });
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.check_circle, color: Colors.white),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Laporan berhasil ditolak',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
+          content: Text(
+            'Sheet $_currentSheet ditolak',
+            style: GoogleFonts.inter(fontSize: 14),
           ),
           backgroundColor: Colors.orange.shade600,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          duration: const Duration(seconds: 2),
         ),
       );
 
-      // Navigate back to dashboard
+      // Kembali ke dashboard
       await Future.delayed(const Duration(milliseconds: 500));
       if (mounted) {
         Navigator.popUntil(context, (route) => route.isFirst);
@@ -525,31 +207,22 @@ class _ChecksheetKomponenReviewPageState
     } catch (e) {
       if (!mounted) return;
 
+      setState(() {
+        _isRejecting = false;
+      });
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'Gagal menolak laporan: $e',
-            style: GoogleFonts.inter(fontSize: 14),
-          ),
+          content: Text('Gagal menolak sheet: $e'),
           backgroundColor: Colors.red.shade600,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
         ),
       );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isRejecting = false;
-        });
-      }
     }
   }
 
   // Scroll helpers
   void _updateScrollArrows() {
-    if (!mounted) return;
+    if (!mounted || !_scrollController.hasClients) return;
 
     setState(() {
       _showLeftArrow = _scrollController.offset > 0;
@@ -564,7 +237,7 @@ class _ChecksheetKomponenReviewPageState
   }
 
   void _updateBackToTopVisibility() {
-    if (!mounted) return;
+    if (!mounted || !_listScrollController.hasClients) return;
 
     final showButton = _listScrollController.offset > 200;
     if (_showBackToTop != showButton) {
@@ -575,6 +248,8 @@ class _ChecksheetKomponenReviewPageState
   }
 
   void _scrollTabsBy(double offset) {
+    if (!_scrollController.hasClients) return;
+
     _scrollController.animateTo(
       (_scrollController.offset + offset).clamp(
         0.0,
@@ -586,6 +261,8 @@ class _ChecksheetKomponenReviewPageState
   }
 
   void _scrollToTop() {
+    if (!_listScrollController.hasClients) return;
+
     _listScrollController.animateTo(
       0,
       duration: const Duration(milliseconds: 500),
@@ -639,10 +316,23 @@ class _ChecksheetKomponenReviewPageState
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Image.asset(
-                'assets/kai_logo_white.png',
+                'assets/logo_putih.png',
                 height: 32,
                 errorBuilder: (context, error, stackTrace) {
-                  return const Icon(Icons.train, color: Colors.white, size: 32);
+                  return Container(
+                    height: 32,
+                    width: 60,
+                    color: Colors.white.withOpacity(0.2),
+                    child: Center(
+                      child: Text(
+                        'KAI',
+                        style: GoogleFonts.plusJakartaSans(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  );
                 },
               ),
               GestureDetector(
@@ -667,7 +357,7 @@ class _ChecksheetKomponenReviewPageState
     );
   }
 
-  /// Tombol Kembali ke Dashboard
+  /// Tombol Kembali ke Review Utama
   Widget _buildBackButton() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
@@ -675,11 +365,11 @@ class _ChecksheetKomponenReviewPageState
         alignment: Alignment.centerLeft,
         child: TextButton.icon(
           onPressed: () {
-            Navigator.popUntil(context, (route) => route.isFirst);
+            Navigator.pop(context);
           },
           icon: const Icon(Icons.arrow_back, size: 18),
           label: Text(
-            'Kembali ke Dashboard',
+            'Kembali ke Review Laporan',
             style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
           ),
           style: TextButton.styleFrom(
@@ -718,7 +408,7 @@ class _ChecksheetKomponenReviewPageState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _reviewData!.noKa,
+                      '${_reviewData!.noKa} - ${_reviewData!.namaKa}',
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -726,117 +416,28 @@ class _ChecksheetKomponenReviewPageState
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      _reviewData!.namaKa,
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        color: Colors.grey.shade700,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: _getStatusColor(_reviewData!.status),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  _reviewData!.status,
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Icon(Icons.person, size: 16, color: Colors.grey.shade600),
-              const SizedBox(width: 6),
-              Text(
-                'Mekanik: ',
-                style: GoogleFonts.inter(
-                  fontSize: 13,
-                  color: Colors.grey.shade600,
-                ),
-              ),
-              Text(
-                _reviewData!.namaMekanik,
-                style: GoogleFonts.inter(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF2196F3),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Icon(Icons.access_time, size: 16, color: Colors.grey.shade600),
-              const SizedBox(width: 6),
-              Text(
-                'Diajukan: ${_formatDateTime(_reviewData!.submittedAt)}',
-                style: GoogleFonts.inter(
-                  fontSize: 13,
-                  color: Colors.grey.shade600,
-                ),
-              ),
-            ],
-          ),
-          if (_reviewData!.catatanPengawas != null) ...[
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.red.shade50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.red.shade200),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.info_outline,
-                    size: 18,
-                    color: Colors.red.shade700,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Row(
                       children: [
-                        Text(
-                          'Catatan Penolakan',
-                          style: GoogleFonts.inter(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.red.shade900,
-                          ),
+                        Icon(
+                          Icons.person,
+                          size: 14,
+                          color: Colors.grey.shade600,
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(width: 4),
                         Text(
-                          _reviewData!.catatanPengawas!,
+                          _reviewData!.namaMekanik,
                           style: GoogleFonts.inter(
-                            fontSize: 12,
-                            color: Colors.red.shade800,
+                            fontSize: 13,
+                            color: Colors.grey.shade700,
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ],
       ),
     );
@@ -845,162 +446,96 @@ class _ChecksheetKomponenReviewPageState
   /// Tab Bar untuk Sheet Selection
   Widget _buildTabBar() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16.0),
+      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       child: Column(
         children: [
-          Stack(
-            children: [
-              // Horizontal scrollable tabs
-              SingleChildScrollView(
-                controller: _scrollController,
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children:
-                      _sheets.map((sheet) {
-                        final isActive = _currentSheet == sheet['name'];
-                        return GestureDetector(
-                          onTap: () {
-                            if (!mounted) return;
-                            setState(() {
-                              _currentSheet = sheet['name'];
-                            });
-                          },
-                          child: Container(
-                            margin: const EdgeInsets.only(right: 12.0),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20.0,
-                              vertical: 12.0,
-                            ),
-                            decoration: BoxDecoration(
+          Row(
+            children:
+                _sheets.map((sheet) {
+                  final isActive = _currentSheet == sheet['name'];
+                  final isApproved =
+                      _sheetApprovalStatus[sheet['name']] ?? false;
+
+                  return Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        if (!mounted) return;
+                        setState(() {
+                          _currentSheet = sheet['name'];
+                        });
+
+                        // Scroll to top when switching tabs
+                        if (_listScrollController.hasClients) {
+                          _listScrollController.jumpTo(0);
+                        }
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 8.0),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 12.0,
+                        ),
+                        decoration: BoxDecoration(
+                          color:
+                              isActive ? const Color(0xFF2196F3) : Colors.white,
+                          borderRadius: BorderRadius.circular(12.0),
+                          border: Border.all(
+                            color:
+                                isActive
+                                    ? const Color(0xFF2196F3)
+                                    : Colors.grey.shade300,
+                          ),
+                          boxShadow:
+                              isActive
+                                  ? [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.08),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ]
+                                  : null,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              sheet['icon'],
+                              size: 18,
                               color:
-                                  isActive ? Colors.white : Colors.transparent,
-                              borderRadius: BorderRadius.circular(12.0),
-                              boxShadow:
                                   isActive
-                                      ? [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.08),
-                                          blurRadius: 8,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ]
-                                      : null,
+                                      ? Colors.white
+                                      : const Color(0xFF2C2A6B),
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  sheet['icon'],
-                                  size: 18,
-                                  color:
-                                      isActive
-                                          ? const Color(0xFF2C2A6B)
-                                          : Colors.white,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  sheet['label'],
-                                  style: GoogleFonts.inter(
-                                    fontSize: 14,
-                                    fontWeight:
-                                        isActive
-                                            ? FontWeight.w700
-                                            : FontWeight.w500,
-                                    color:
-                                        isActive
-                                            ? const Color(0xFF2C2A6B)
-                                            : Colors.white,
-                                  ),
-                                ),
-                              ],
+                            const SizedBox(width: 8),
+                            Text(
+                              sheet['label'],
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                fontWeight:
+                                    isActive
+                                        ? FontWeight.w700
+                                        : FontWeight.w600,
+                                color:
+                                    isActive
+                                        ? Colors.white
+                                        : const Color(0xFF2C2A6B),
+                              ),
                             ),
-                          ),
-                        );
-                      }).toList(),
-                ),
-              ),
-              // Left arrow
-              if (_showLeftArrow)
-                Positioned(
-                  left: 0,
-                  top: 0,
-                  bottom: 0,
-                  child: GestureDetector(
-                    onTap: () => _scrollTabsBy(-100),
-                    child: Container(
-                      width: 32,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.grey.shade50,
-                            Colors.grey.shade50.withOpacity(0),
+                            if (isApproved) ...[
+                              const SizedBox(width: 6),
+                              Icon(
+                                Icons.check_circle,
+                                size: 16,
+                                color: isActive ? Colors.white : Colors.green,
+                              ),
+                            ],
                           ],
                         ),
                       ),
-                      child: const Icon(
-                        Icons.chevron_left,
-                        color: Color(0xFF2C2A6B),
-                      ),
                     ),
-                  ),
-                ),
-              // Right arrow
-              if (_showRightArrow)
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  bottom: 0,
-                  child: GestureDetector(
-                    onTap: () => _scrollTabsBy(100),
-                    child: Container(
-                      width: 32,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.grey.shade50.withOpacity(0),
-                            Colors.grey.shade50,
-                          ],
-                        ),
-                      ),
-                      child: const Icon(
-                        Icons.chevron_right,
-                        color: Color(0xFF2C2A6B),
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          // Scroll indicator
-          const SizedBox(height: 8),
-          ClipRect(
-            child: Container(
-              height: 4,
-              margin: const EdgeInsets.symmetric(horizontal: 0),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(2),
-              ),
-              child: Stack(
-                children: [
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      return Positioned(
-                        left: _scrollProgress * (constraints.maxWidth * 0.7),
-                        child: Container(
-                          width: constraints.maxWidth * 0.3,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF2196F3),
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
+                  );
+                }).toList(),
           ),
         ],
       ),
@@ -1009,44 +544,51 @@ class _ChecksheetKomponenReviewPageState
 
   /// Checksheet Content
   Widget _buildChecksheetContent() {
-    final sheetData = _reviewData!.sheets[_currentSheet] as List<dynamic>?;
-
-    if (sheetData == null || sheetData.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.inbox_outlined, size: 64, color: Colors.grey.shade400),
-            const SizedBox(height: 16),
-            Text(
-              'Tidak ada data untuk sheet ini',
-              style: GoogleFonts.inter(
-                fontSize: 16,
-                color: Colors.grey.shade600,
-              ),
-            ),
-          ],
-        ),
-      );
+    if (_reviewData == null) {
+      return const Center(child: Text('Data tidak tersedia'));
     }
 
+    final sheetData = _reviewData!.sheets[_currentSheet];
+
+    if (sheetData == null) {
+      return _buildEmptyState();
+    }
+
+    // Cek format data: apakah Map (dengan kategori) atau List
+    if (sheetData is Map<String, dynamic>) {
+      final kategoriList = sheetData['kategori'] as List<dynamic>?;
+      if (kategoriList == null || kategoriList.isEmpty) {
+        return _buildEmptyState();
+      }
+
+      return _buildKategoriContent(kategoriList);
+    } else {
+      return _buildEmptyState();
+    }
+  }
+
+  /// Build content dengan kategori
+  Widget _buildKategoriContent(List<dynamic> kategoriList) {
     return ListView.builder(
       controller: _listScrollController,
       padding: const EdgeInsets.all(16.0),
-      itemCount: sheetData.length + 1, // +1 untuk tombol approve/reject
+      itemCount: kategoriList.length + 1, // +1 untuk action buttons
       itemBuilder: (context, index) {
-        if (index == sheetData.length) {
+        if (index == kategoriList.length) {
           return _buildActionButtons();
         }
 
-        final item = sheetData[index];
-        final isKategori = item['kategori'] != null;
+        final kategori = kategoriList[index] as Map<String, dynamic>;
+        final namaKategori = kategori['nama_kategori'] ?? '';
+        final items = kategori['items'] as List<dynamic>? ?? [];
 
-        if (isKategori) {
-          return _buildKategoriHeader(item['kategori']);
-        } else {
-          return _buildChecksheetItem(item);
-        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildKategoriHeader(namaKategori),
+            ...items.map((item) => _buildChecksheetItem(item)).toList(),
+          ],
+        );
       },
     );
   }
@@ -1054,29 +596,36 @@ class _ChecksheetKomponenReviewPageState
   /// Kategori Header
   Widget _buildKategoriHeader(String kategori) {
     return Container(
-      margin: const EdgeInsets.only(top: 16.0, bottom: 8.0),
+      margin: const EdgeInsets.only(top: 16.0, bottom: 12.0),
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       decoration: BoxDecoration(
-        color: const Color(0xFF2C2A6B),
+        color: const Color(0xFF2196F3).withOpacity(0.1),
         borderRadius: BorderRadius.circular(12.0),
+        border: Border.all(color: const Color(0xFF2196F3), width: 1.5),
       ),
-      child: Text(
-        kategori,
-        style: GoogleFonts.inter(
-          fontSize: 14,
-          fontWeight: FontWeight.w700,
-          color: Colors.white,
-        ),
+      child: Row(
+        children: [
+          Icon(Icons.folder_open, size: 18, color: const Color(0xFF2196F3)),
+          const SizedBox(width: 8),
+          Text(
+            kategori,
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF2196F3),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  /// Checksheet Item (Read-only dengan badge "Terisi")
+  /// Checksheet Item (Read-only)
   Widget _buildChecksheetItem(Map<String, dynamic> item) {
     final itemPemeriksaan = item['item_pemeriksaan'] ?? '';
     final standar = item['standar'] ?? '';
     final hasilInput = item['hasil_input'] ?? '';
-    final satuan = item['satuan'] ?? '';
+    final keterangan = item['keterangan'] ?? '';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12.0),
@@ -1084,7 +633,7 @@ class _ChecksheetKomponenReviewPageState
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12.0),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: const Color(0xFF2196F3).withOpacity(0.3)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
@@ -1097,77 +646,59 @@ class _ChecksheetKomponenReviewPageState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Item Pemeriksaan
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  itemPemeriksaan,
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF2C2A6B),
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: Colors.blue.shade200),
-                ),
-                child: Text(
-                  'Terisi',
-                  style: GoogleFonts.inter(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.blue.shade700,
-                  ),
-                ),
-              ),
-            ],
+          Text(
+            itemPemeriksaan,
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+              height: 1.4,
+            ),
           ),
+          const SizedBox(height: 12),
+
           // Standar
-          if (standar.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: const Color(0xFFE3F2FD),
-                borderRadius: BorderRadius.circular(8),
-                border: const Border(
-                  bottom: BorderSide(color: Color(0xFF2196F3), width: 2),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Text(
-                    'Standar:',
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.grey.shade700,
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    standar,
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF2C2A6B),
-                    ),
-                  ),
-                ],
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFFE3F2FD),
+              borderRadius: BorderRadius.circular(8),
+              border: const Border(
+                bottom: BorderSide(color: Color(0xFF2196F3), width: 2),
               ),
             ),
-          ],
-          // Hasil Input
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Standar:',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF2196F3),
+                  ),
+                ),
+                Flexible(
+                  child: Text(
+                    standar,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF2196F3),
+                    ),
+                    textAlign: TextAlign.right,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
           const SizedBox(height: 12),
+
+          // Hasil Input
           Container(
+            width: double.infinity,
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.green.shade50,
@@ -1190,27 +721,89 @@ class _ChecksheetKomponenReviewPageState
                     color: Colors.grey.shade700,
                   ),
                 ),
-                Text(
-                  satuan.isNotEmpty ? '$hasilInput $satuan' : hasilInput,
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.green.shade800,
+                Expanded(
+                  child: Text(
+                    hasilInput,
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.green.shade800,
+                    ),
                   ),
                 ),
               ],
             ),
           ),
+
+          // Keterangan (jika ada)
+          if (keterangan.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Keterangan:',
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    keterangan,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: Colors.grey.shade800,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );
   }
 
-  /// Action Buttons (Approve & Reject)
+  /// Action Buttons (Approve & Reject per sheet)
   Widget _buildActionButtons() {
-    // Jangan tampilkan tombol jika status bukan 'Pending Approval'
-    if (_reviewData?.status != 'Pending Approval') {
-      return const SizedBox.shrink();
+    final isApproved = _sheetApprovalStatus[_currentSheet] ?? false;
+
+    if (isApproved) {
+      return Container(
+        margin: const EdgeInsets.only(top: 24.0, bottom: 16.0),
+        padding: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          color: Colors.green.shade50,
+          borderRadius: BorderRadius.circular(12.0),
+          border: Border.all(color: Colors.green.shade200),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.check_circle, color: Colors.green.shade700, size: 24),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Sheet $_currentSheet sudah disetujui',
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.green.shade800,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
     }
 
     return Container(
@@ -1220,7 +813,8 @@ class _ChecksheetKomponenReviewPageState
           // Reject Button
           Expanded(
             child: ElevatedButton.icon(
-              onPressed: _isApproving || _isRejecting ? null : _handleReject,
+              onPressed:
+                  _isApproving || _isRejecting ? null : _handleRejectSheet,
               icon:
                   _isRejecting
                       ? const SizedBox(
@@ -1256,7 +850,8 @@ class _ChecksheetKomponenReviewPageState
           // Approve Button
           Expanded(
             child: ElevatedButton.icon(
-              onPressed: _isApproving || _isRejecting ? null : _handleApprove,
+              onPressed:
+                  _isApproving || _isRejecting ? null : _handleApproveSheet,
               icon:
                   _isApproving
                       ? const SizedBox(
@@ -1287,6 +882,23 @@ class _ChecksheetKomponenReviewPageState
                 ),
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Empty State
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.inbox_outlined, size: 64, color: Colors.grey.shade400),
+          const SizedBox(height: 16),
+          Text(
+            'Tidak ada data untuk sheet ini',
+            style: GoogleFonts.inter(fontSize: 16, color: Colors.grey.shade600),
           ),
         ],
       ),
@@ -1375,9 +987,259 @@ class _ChecksheetKomponenReviewPageState
       bottom: 16,
       child: FloatingActionButton.small(
         onPressed: _scrollToTop,
-        backgroundColor: const Color(0xFF2C2A6B),
+        backgroundColor: const Color(0xFF2196F3),
         child: const Icon(Icons.arrow_upward, color: Colors.white, size: 20),
       ),
+    );
+  }
+
+  /// Show Approve Dialog
+  Future<bool?> _showApproveDialog() {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(28),
+            ),
+            icon: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.green.shade50,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.check_circle_outline,
+                size: 48,
+                color: Colors.green.shade600,
+              ),
+            ),
+            title: Text(
+              'Setujui Sheet $_currentSheet?',
+              style: GoogleFonts.inter(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            content: Text(
+              'Anda akan menyetujui data checksheet $_currentSheet.',
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                color: Colors.grey.shade700,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            actionsAlignment: MainAxisAlignment.center,
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(
+                  'Batal',
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade700,
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green.shade600,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  'Setujui',
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+    );
+  }
+
+  /// Show Reject Dialog
+  Future<String?> _showRejectDialog() {
+    final controller = TextEditingController();
+
+    return showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(28),
+            ),
+            icon: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.cancel_outlined,
+                size: 48,
+                color: Colors.red.shade600,
+              ),
+            ),
+            title: Text(
+              'Tolak Sheet $_currentSheet?',
+              style: GoogleFonts.inter(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Berikan alasan penolakan untuk Mekanik.',
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    color: Colors.grey.shade700,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: controller,
+                  maxLines: 4,
+                  decoration: InputDecoration(
+                    hintText: 'Contoh: Data checksheet tidak lengkap...',
+                    filled: true,
+                    fillColor: Colors.grey.shade50,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            actionsAlignment: MainAxisAlignment.center,
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, null),
+                child: Text(
+                  'Batal',
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  if (controller.text.trim().isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Alasan wajib diisi')),
+                    );
+                    return;
+                  }
+                  Navigator.pop(context, controller.text.trim());
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red.shade600,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  'Tolak',
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+    );
+  }
+
+  /// Show All Approved Dialog
+  void _showAllApprovedDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(28),
+            ),
+            icon: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.green.shade50,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.check_circle,
+                size: 48,
+                color: Colors.green.shade600,
+              ),
+            ),
+            title: Text(
+              'Semua Sheet Disetujui!',
+              style: GoogleFonts.inter(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            content: Text(
+              'Semua checksheet sudah disetujui. Kembali ke dashboard?',
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                color: Colors.grey.shade700,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            actionsAlignment: MainAxisAlignment.center,
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.popUntil(context, (route) => route.isFirst);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green.shade600,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  'Kembali ke Dashboard',
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
     );
   }
 
@@ -1422,25 +1284,6 @@ class _ChecksheetKomponenReviewPageState
                     color: Colors.grey.shade600,
                   ),
                 ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.green.shade50,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    'Pengawas',
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.green.shade700,
-                    ),
-                  ),
-                ),
                 const SizedBox(height: 24),
                 ListTile(
                   leading: const Icon(Icons.logout, color: Colors.red),
@@ -1467,43 +1310,5 @@ class _ChecksheetKomponenReviewPageState
             ),
           ),
     );
-  }
-
-  // Helper: Get status color
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'Pending Approval':
-        return Colors.orange.shade600;
-      case 'Approved':
-        return Colors.green.shade600;
-      case 'Rejected':
-        return Colors.red.shade600;
-      default:
-        return Colors.grey.shade600;
-    }
-  }
-
-  // Helper: Format DateTime
-  String _formatDateTime(String dateTimeStr) {
-    try {
-      final dateTime = DateTime.parse(dateTimeStr);
-      final months = [
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'Mei',
-        'Jun',
-        'Jul',
-        'Agu',
-        'Sep',
-        'Okt',
-        'Nov',
-        'Des',
-      ];
-      return '${dateTime.day} ${months[dateTime.month - 1]} ${dateTime.year}, ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-    } catch (e) {
-      return dateTimeStr;
-    }
   }
 }

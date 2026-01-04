@@ -274,6 +274,80 @@ class MockChecksheetData {
             },
           ],
         },
+        // ✅ LIST GERBONG untuk Mekanik 2
+        'mekanik_2': {
+          'gerbong_list': [
+            {
+              'gerbong_id': 'G-101',
+              'nama_gerbong': 'Gerbong Penumpang 101',
+              'status': 'Selesai Diperbaiki',
+              'jumlah_item': 8,
+              'item_selesai': 8,
+              'catatan': 'Semua komponen bogie dalam kondisi baik',
+            },
+            {
+              'gerbong_id': 'G-102',
+              'nama_gerbong': 'Gerbong Penumpang 102',
+              'status': 'Selesai Diperbaiki',
+              'jumlah_item': 8,
+              'item_selesai': 8,
+              'catatan': 'Spring secondary perlu pelumasan berkala',
+            },
+            {
+              'gerbong_id': 'G-103',
+              'nama_gerbong': 'Gerbong Penumpang 103',
+              'status': 'Dalam Perbaikan',
+              'jumlah_item': 8,
+              'item_selesai': 5,
+              'catatan': 'Penggantian bearing roda sedang dilakukan',
+            },
+            {
+              'gerbong_id': 'G-104',
+              'nama_gerbong': 'Gerbong Penumpang 104',
+              'status': 'Selesai Diperbaiki',
+              'jumlah_item': 8,
+              'item_selesai': 8,
+              'catatan': 'Kondisi optimal',
+            },
+          ],
+        },
+        // ✅ LIST GERBONG untuk Elektrik
+        'elektrik': {
+          'gerbong_list': [
+            {
+              'gerbong_id': 'G-101',
+              'nama_gerbong': 'Gerbong Penumpang 101',
+              'status': 'Selesai Diperbaiki',
+              'jumlah_item': 12,
+              'item_selesai': 12,
+              'catatan': 'Sistem kelistrikan & HVAC normal',
+            },
+            {
+              'gerbong_id': 'G-102',
+              'nama_gerbong': 'Gerbong Penumpang 102',
+              'status': 'Perlu Perbaikan',
+              'jumlah_item': 12,
+              'item_selesai': 11,
+              'catatan': 'Lampu kabin 3 perlu diganti',
+            },
+            {
+              'gerbong_id': 'G-103',
+              'nama_gerbong': 'Gerbong Penumpang 103',
+              'status': 'Selesai Diperbaiki',
+              'jumlah_item': 12,
+              'item_selesai': 12,
+              'catatan': 'Semua sistem berfungsi normal',
+            },
+            {
+              'gerbong_id': 'G-104',
+              'nama_gerbong': 'Gerbong Penumpang 104',
+              'status': 'Selesai Diperbaiki',
+              'jumlah_item': 12,
+              'item_selesai': 12,
+              'catatan': 'AC unit berfungsi optimal',
+            },
+          ],
+        },
       },
       logGangguan: [
         {
@@ -287,210 +361,9 @@ class MockChecksheetData {
     );
   }
 
-  /// Generate mock data untuk Gerbong Fase
-  static ChecksheetReviewModel getMockGerbong(int laporanId) {
-    return ChecksheetReviewModel(
-      laporanId: laporanId,
-      noKa: 'KA-15',
-      namaKa: 'Argo Dwipangga',
-      status: 'Pending Approval',
-      namaMekanik: 'Gilang Yanuar',
-      submittedAt:
-          DateTime.now().subtract(const Duration(hours: 3)).toIso8601String(),
-      catatanPengawas: null,
-      sheets: {
-        'gerbong_fase': [
-          {
-            'fase': 'Fase 1',
-            'no_gerbong': 'G-101',
-            'kondisi_umum': 'BAIK',
-            'catatan': 'Semua sistem normal',
-          },
-          {
-            'fase': 'Fase 1',
-            'no_gerbong': 'G-102',
-            'kondisi_umum': 'BAIK',
-            'catatan': 'Pendingin AC perlu dibersihkan',
-          },
-          {
-            'fase': 'Fase 2',
-            'no_gerbong': 'G-201',
-            'kondisi_umum': 'PERLU PERHATIAN',
-            'catatan': 'Pintu otomatis agak lambat',
-          },
-          {
-            'fase': 'Fase 2',
-            'no_gerbong': 'G-202',
-            'kondisi_umum': 'BAIK',
-            'catatan': 'Semua sistem normal',
-          },
-        ],
-      },
-      logGangguan: [],
-    );
-  }
-
-  /// Generate mock data untuk Mekanik 2
-  static ChecksheetReviewModel getMockMekanik2(int laporanId) {
-    return ChecksheetReviewModel(
-      laporanId: laporanId,
-      noKa: 'KA-15',
-      namaKa: 'Argo Dwipangga',
-      status: 'Pending Approval',
-      namaMekanik: 'Gilang Yanuar',
-      submittedAt:
-          DateTime.now().subtract(const Duration(hours: 2)).toIso8601String(),
-      catatanPengawas: null,
-      sheets: {
-        'mekanik_2': {
-          'kategori': [
-            {
-              'nama_kategori': 'PEMERIKSAAN BOGIE',
-              'items': [
-                {
-                  'item_pemeriksaan': 'Kondisi as roda',
-                  'hasil_pemeriksaan': 'BAIK',
-                  'keterangan': 'Tidak ada keausan abnormal',
-                },
-                {
-                  'item_pemeriksaan': 'Kondisi primary spring',
-                  'hasil_pemeriksaan': 'BAIK',
-                  'keterangan': 'Elastisitas normal',
-                },
-                {
-                  'item_pemeriksaan': 'Kondisi secondary spring',
-                  'hasil_pemeriksaan': 'PERLU PERHATIAN',
-                  'keterangan': 'Ditemukan sedikit korosi, perlu dilumasi',
-                },
-              ],
-            },
-            {
-              'nama_kategori': 'SISTEM KOPLING',
-              'items': [
-                {
-                  'item_pemeriksaan': 'Kondisi automatic coupler',
-                  'hasil_pemeriksaan': 'BAIK',
-                  'keterangan': 'Fungsi normal',
-                },
-                {
-                  'item_pemeriksaan': 'Kondisi semi permanent coupler',
-                  'hasil_pemeriksaan': 'BAIK',
-                  'keterangan': 'Tidak ada kelonggaran',
-                },
-              ],
-            },
-          ],
-        },
-      },
-      logGangguan: [],
-    );
-  }
-
-  /// Generate mock data untuk Elektrik
-  static ChecksheetReviewModel getMockElektrik(int laporanId) {
-    return ChecksheetReviewModel(
-      laporanId: laporanId,
-      noKa: 'KA-15',
-      namaKa: 'Argo Dwipangga',
-      status: 'Pending Approval',
-      namaMekanik: 'Budi Santoso',
-      submittedAt:
-          DateTime.now().subtract(const Duration(hours: 1)).toIso8601String(),
-      catatanPengawas: null,
-      sheets: {
-        'elektrik': {
-          'kategori': [
-            {
-              'nama_kategori': 'SISTEM KELISTRIKAN UTAMA',
-              'items': [
-                {
-                  'item_pemeriksaan': 'Tegangan baterai',
-                  'hasil_pemeriksaan': 'NORMAL',
-                  'keterangan': '24.5V - dalam range normal',
-                },
-                {
-                  'item_pemeriksaan': 'Kondisi MCB',
-                  'hasil_pemeriksaan': 'BAIK',
-                  'keterangan': 'Semua MCB berfungsi',
-                },
-                {
-                  'item_pemeriksaan': 'Kondisi kabel power',
-                  'hasil_pemeriksaan': 'BAIK',
-                  'keterangan': 'Tidak ada kerusakan isolasi',
-                },
-              ],
-            },
-            {
-              'nama_kategori': 'SISTEM PENCAHAYAAN',
-              'items': [
-                {
-                  'item_pemeriksaan': 'Lampu utama',
-                  'hasil_pemeriksaan': 'BAIK',
-                  'keterangan': 'Semua berfungsi',
-                },
-                {
-                  'item_pemeriksaan': 'Lampu kabin',
-                  'hasil_pemeriksaan': 'PERLU PERBAIKAN',
-                  'keterangan': '1 lampu mati di kabin 3, perlu ganti',
-                },
-                {
-                  'item_pemeriksaan': 'Lampu emergency',
-                  'hasil_pemeriksaan': 'BAIK',
-                  'keterangan': 'Tested - berfungsi normal',
-                },
-              ],
-            },
-            {
-              'nama_kategori': 'SISTEM HVAC',
-              'items': [
-                {
-                  'item_pemeriksaan': 'Kondisi AC unit 1',
-                  'hasil_pemeriksaan': 'BAIK',
-                  'keterangan': 'Pendinginan optimal',
-                },
-                {
-                  'item_pemeriksaan': 'Kondisi AC unit 2',
-                  'hasil_pemeriksaan': 'BAIK',
-                  'keterangan': 'Pendinginan optimal',
-                },
-              ],
-            },
-          ],
-        },
-      },
-      logGangguan: [
-        {
-          'tanggal': '2025-12-16',
-          'jenis_gangguan': 'Sistem Pencahayaan',
-          'deskripsi': 'Lampu kabin 3 mati',
-          'tindakan': 'Akan diganti pada maintenance berikutnya',
-          'status': 'Pending',
-        },
-      ],
-    );
-  }
-
   /// Get mock data based on sheet type
   static ChecksheetReviewModel getMockData(int laporanId, String sheetType) {
-    switch (sheetType.toLowerCase()) {
-      case 'inventaris':
-      case 'tool_box':
-      case 'tool_kit':
-        return getMockInventaris(laporanId);
-
-      case 'gerbong':
-      case 'gerbong_fase':
-        return getMockGerbong(laporanId);
-
-      case 'mekanik_2':
-        return getMockMekanik2(laporanId);
-
-      case 'electric':
-      case 'elektrik':
-        return getMockElektrik(laporanId);
-
-      default:
-        return getMockInventaris(laporanId);
-    }
+    // Semua data sudah ada di getMockInventaris
+    return getMockInventaris(laporanId);
   }
 }

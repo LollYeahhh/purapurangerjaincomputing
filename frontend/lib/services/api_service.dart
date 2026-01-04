@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import '../utils/constants.dart';
 import '../models/jadwal_model.dart';
 import '../models/laporan_model.dart';
+import '../models/checksheet_review_model.dart';
 
 class ApiService {
   /// ✅ SIMULASI: GET Dashboard Mekanik - Jadwal (Dummy Data)
@@ -241,4 +242,230 @@ class ApiService {
       throw Exception('Error: $e');
     }
     */
+
+  // ========================================
+  // ✅ METHOD BARU UNTUK REVIEW CHECKSHEET
+  // ========================================
+
+  /// ✅ SIMULASI: GET Laporan Detail untuk Review Pengawas
+  static Future<ChecksheetReviewModel> getLaporanDetail(
+    String token,
+    int laporanId,
+  ) async {
+    // Simulasi delay network
+    await Future.delayed(const Duration(seconds: 1));
+
+    // ✅ DUMMY DATA untuk simulasi
+    final Map<String, dynamic> dummyDetailData = {
+      'laporan_id': laporanId,
+      'no_ka': 'KA 233',
+      'nama_ka': 'Probowangi',
+      'nama_mekanik': 'Gilang Yanuar',
+      'status': 'Pending Approval',
+      'submitted_at': '2025-12-08T10:30:00Z',
+      'catatan_pengawas': null,
+      'sheets': {
+        'mekanik': [
+          {'kategori': 'PERALATAN MEKANIK'},
+          {
+            'item_pemeriksaan': 'Tang Kombinasi',
+            'standar': '2 buah',
+            'hasil_input': '2',
+            'satuan': 'buah',
+          },
+          {
+            'item_pemeriksaan': 'Obeng Plus',
+            'standar': '3 buah',
+            'hasil_input': '3',
+            'satuan': 'buah',
+          },
+          {
+            'item_pemeriksaan': 'Obeng Minus',
+            'standar': '3 buah',
+            'hasil_input': '3',
+            'satuan': 'buah',
+          },
+          {'kategori': 'PERALATAN UKUR'},
+          {
+            'item_pemeriksaan': 'Multimeter Digital',
+            'standar': '1 unit',
+            'hasil_input': '1',
+            'satuan': 'unit',
+          },
+        ],
+        'genset': [
+          {'kategori': 'PEMERIKSAAN GENSET'},
+          {
+            'item_pemeriksaan': 'Tegangan Output',
+            'standar': '220V ± 10V',
+            'hasil_input': '225',
+            'satuan': 'V',
+          },
+          {
+            'item_pemeriksaan': 'Frekuensi',
+            'standar': '50Hz ± 1Hz',
+            'hasil_input': '50',
+            'satuan': 'Hz',
+          },
+          {
+            'item_pemeriksaan': 'Tekanan Oli',
+            'standar': '3-5 bar',
+            'hasil_input': '4',
+            'satuan': 'bar',
+          },
+        ],
+      },
+      'log_gangguan': [],
+    };
+
+    return ChecksheetReviewModel.fromJson(dummyDetailData);
+
+    /* 
+    ========================================
+    🚀 PRODUCTION API CALL
+    ========================================
+    
+    try {
+      final response = await http.get(
+        Uri.parse('${AppConstants.baseUrl}${AppConstants.apiVersion}/pengawas/laporan/$laporanId'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        if (jsonData['status'] == 'success') {
+          return ChecksheetReviewModel.fromJson(jsonData['data']);
+        } else {
+          throw Exception('Failed to load laporan detail');
+        }
+      } else if (response.statusCode == 401) {
+        throw Exception('Unauthenticated');
+      } else if (response.statusCode == 404) {
+        throw Exception('Laporan tidak ditemukan');
+      } else {
+        throw Exception('Failed to load laporan detail');
+      }
+    } catch (e) {
+      throw Exception('Error: $e');
+    }
+    */
+  }
+
+  /// ✅ SIMULASI: Approve Laporan
+  static Future<Map<String, dynamic>> approveLaporan(
+    String token,
+    int laporanId,
+  ) async {
+    // Simulasi delay network
+    await Future.delayed(const Duration(seconds: 1));
+
+    // ✅ SIMULASI: Selalu berhasil
+    return {
+      'status': 'success',
+      'message': 'Laporan berhasil disetujui',
+      'data': {
+        'laporan_id': laporanId,
+        'status': 'Approved',
+        'approved_at': DateTime.now().toIso8601String(),
+      },
+    };
+
+    /* 
+    ========================================
+    🚀 PRODUCTION API CALL
+    ========================================
+    
+    try {
+      final response = await http.post(
+        Uri.parse('${AppConstants.baseUrl}${AppConstants.apiVersion}/pengawas/laporan/$laporanId/approve'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        if (jsonData['status'] == 'success') {
+          return jsonData;
+        } else {
+          throw Exception('Failed to approve laporan');
+        }
+      } else if (response.statusCode == 401) {
+        throw Exception('Unauthenticated');
+      } else if (response.statusCode == 404) {
+        throw Exception('Laporan tidak ditemukan');
+      } else {
+        throw Exception('Failed to approve laporan');
+      }
+    } catch (e) {
+      throw Exception('Error: $e');
+    }
+    */
+  }
+
+  /// ✅ SIMULASI: Reject Laporan
+  static Future<Map<String, dynamic>> rejectLaporan(
+    String token,
+    int laporanId,
+    String alasan,
+  ) async {
+    // Simulasi delay network
+    await Future.delayed(const Duration(seconds: 1));
+
+    // ✅ SIMULASI: Selalu berhasil
+    return {
+      'status': 'success',
+      'message': 'Laporan berhasil ditolak',
+      'data': {
+        'laporan_id': laporanId,
+        'status': 'Rejected',
+        'catatan_pengawas': alasan,
+        'rejected_at': DateTime.now().toIso8601String(),
+      },
+    };
+
+    /* 
+    ========================================
+    🚀 PRODUCTION API CALL
+    ========================================
+    
+    try {
+      final response = await http.post(
+        Uri.parse('${AppConstants.baseUrl}${AppConstants.apiVersion}/pengawas/laporan/$laporanId/reject'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'alasan': alasan,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        if (jsonData['status'] == 'success') {
+          return jsonData;
+        } else {
+          throw Exception('Failed to reject laporan');
+        }
+      } else if (response.statusCode == 401) {
+        throw Exception('Unauthenticated');
+      } else if (response.statusCode == 404) {
+        throw Exception('Laporan tidak ditemukan');
+      } else if (response.statusCode == 400) {
+        throw Exception('Alasan penolakan wajib diisi');
+      } else {
+        throw Exception('Failed to reject laporan');
+      }
+    } catch (e) {
+      throw Exception('Error: $e');
+    }
+    */
+  }
 }

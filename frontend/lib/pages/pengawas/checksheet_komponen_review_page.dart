@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/user_model.dart';
 import '../../models/checksheet_review_model.dart';
-import '../../services/pengawas_checksheet_service.dart';
+import '../../services/api_service.dart';
 import '../auth/login_page.dart';
 
 /// ChecksheetKomponenReviewPage - Halaman review Mekanik & Genset untuk Pengawas
@@ -29,7 +29,6 @@ class _ChecksheetKomponenReviewPageState
     extends State<ChecksheetKomponenReviewPage> {
   final ScrollController _scrollController = ScrollController();
   final ScrollController _listScrollController = ScrollController();
-  final PengawasChecksheetService _service = PengawasChecksheetService();
 
   // State variables
   ChecksheetReviewModel? _reviewData;
@@ -55,8 +54,10 @@ class _ChecksheetKomponenReviewPageState
   void initState() {
     super.initState();
     _currentSheet = widget.initialSheet;
+
     _scrollController.addListener(_updateScrollArrows);
     _listScrollController.addListener(_updateBackToTopVisibility);
+
     _fetchLaporanData();
   }
 
@@ -77,7 +78,11 @@ class _ChecksheetKomponenReviewPageState
     });
 
     try {
-      final data = await _service.fetchLaporanDetail(widget.laporanId);
+      final data = await ApiService.getLaporanDetail(
+        widget.user.token ?? '',
+        widget.laporanId,
+      );
+
       if (mounted) {
         setState(() {
           _reviewData = data;
@@ -224,10 +229,16 @@ class _ChecksheetKomponenReviewPageState
     if (confirm != true) return;
 
     if (!mounted) return;
-    setState(() => _isApproving = true);
+
+    setState(() {
+      _isApproving = true;
+    });
 
     try {
-      await _service.approveLaporan(widget.laporanId);
+      await ApiService.approveLaporan(
+        widget.user.token ?? '',
+        widget.laporanId,
+      );
 
       if (!mounted) return;
 
@@ -281,7 +292,9 @@ class _ChecksheetKomponenReviewPageState
       );
     } finally {
       if (mounted) {
-        setState(() => _isApproving = false);
+        setState(() {
+          _isApproving = false;
+        });
       }
     }
   }
@@ -463,10 +476,17 @@ class _ChecksheetKomponenReviewPageState
     if (result == null || result.isEmpty) return;
 
     if (!mounted) return;
-    setState(() => _isRejecting = true);
+
+    setState(() {
+      _isRejecting = true;
+    });
 
     try {
-      await _service.rejectLaporan(widget.laporanId, result);
+      await ApiService.rejectLaporan(
+        widget.user.token ?? '',
+        widget.laporanId,
+        result,
+      );
 
       if (!mounted) return;
 
@@ -520,7 +540,9 @@ class _ChecksheetKomponenReviewPageState
       );
     } finally {
       if (mounted) {
-        setState(() => _isRejecting = false);
+        setState(() {
+          _isRejecting = false;
+        });
       }
     }
   }
@@ -528,6 +550,7 @@ class _ChecksheetKomponenReviewPageState
   // Scroll helpers
   void _updateScrollArrows() {
     if (!mounted) return;
+
     setState(() {
       _showLeftArrow = _scrollController.offset > 0;
       _showRightArrow =
@@ -542,9 +565,12 @@ class _ChecksheetKomponenReviewPageState
 
   void _updateBackToTopVisibility() {
     if (!mounted) return;
+
     final showButton = _listScrollController.offset > 200;
     if (_showBackToTop != showButton) {
-      setState(() => _showBackToTop = showButton);
+      setState(() {
+        _showBackToTop = showButton;
+      });
     }
   }
 
@@ -625,7 +651,7 @@ class _ChecksheetKomponenReviewPageState
                   radius: 20,
                   backgroundColor: Colors.white,
                   child: Text(
-                    widget.user.name[0].toUpperCase(),
+                    (widget.user.nama ?? 'P')[0].toUpperCase(),
                     style: GoogleFonts.inter(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
@@ -789,7 +815,7 @@ class _ChecksheetKomponenReviewPageState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Catatan Penolakan:',
+                          'Catatan Penolakan',
                           style: GoogleFonts.inter(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -835,7 +861,9 @@ class _ChecksheetKomponenReviewPageState
                         return GestureDetector(
                           onTap: () {
                             if (!mounted) return;
-                            setState(() => _currentSheet = sheet['name']);
+                            setState(() {
+                              _currentSheet = sheet['name'];
+                            });
                           },
                           child: Container(
                             margin: const EdgeInsets.only(right: 12.0),
@@ -891,7 +919,6 @@ class _ChecksheetKomponenReviewPageState
                       }).toList(),
                 ),
               ),
-
               // Left arrow
               if (_showLeftArrow)
                 Positioned(
@@ -917,7 +944,6 @@ class _ChecksheetKomponenReviewPageState
                     ),
                   ),
                 ),
-
               // Right arrow
               if (_showRightArrow)
                 Positioned(
@@ -945,7 +971,6 @@ class _ChecksheetKomponenReviewPageState
                 ),
             ],
           ),
-
           // Scroll indicator
           const SizedBox(height: 8),
           ClipRect(
@@ -961,7 +986,7 @@ class _ChecksheetKomponenReviewPageState
                   LayoutBuilder(
                     builder: (context, constraints) {
                       return Positioned(
-                        left: _scrollProgress * constraints.maxWidth * 0.7,
+                        left: _scrollProgress * (constraints.maxWidth * 0.7),
                         child: Container(
                           width: constraints.maxWidth * 0.3,
                           height: 4,
@@ -1105,7 +1130,6 @@ class _ChecksheetKomponenReviewPageState
               ),
             ],
           ),
-
           // Standar
           if (standar.isNotEmpty) ...[
             const SizedBox(height: 12),
@@ -1114,8 +1138,8 @@ class _ChecksheetKomponenReviewPageState
               decoration: BoxDecoration(
                 color: const Color(0xFFE3F2FD),
                 borderRadius: BorderRadius.circular(8),
-                border: Border(
-                  bottom: BorderSide(color: const Color(0xFF2196F3), width: 2),
+                border: const Border(
+                  bottom: BorderSide(color: Color(0xFF2196F3), width: 2),
                 ),
               ),
               child: Row(
@@ -1141,7 +1165,6 @@ class _ChecksheetKomponenReviewPageState
               ),
             ),
           ],
-
           // Hasil Input
           const SizedBox(height: 12),
           Container(
@@ -1185,7 +1208,7 @@ class _ChecksheetKomponenReviewPageState
 
   /// Action Buttons (Approve & Reject)
   Widget _buildActionButtons() {
-    // Jangan tampilkan tombol jika status bukan Pending Approval
+    // Jangan tampilkan tombol jika status bukan 'Pending Approval'
     if (_reviewData?.status != 'Pending Approval') {
       return const SizedBox.shrink();
     }
@@ -1229,9 +1252,7 @@ class _ChecksheetKomponenReviewPageState
               ),
             ),
           ),
-
           const SizedBox(width: 12),
-
           // Approve Button
           Expanded(
             child: ElevatedButton.icon(
@@ -1377,7 +1398,7 @@ class _ChecksheetKomponenReviewPageState
                   radius: 40,
                   backgroundColor: const Color(0xFF2C2A6B),
                   child: Text(
-                    widget.user.name[0].toUpperCase(),
+                    (widget.user.nama ?? 'P')[0].toUpperCase(),
                     style: GoogleFonts.inter(
                       fontSize: 32,
                       fontWeight: FontWeight.w700,
@@ -1387,7 +1408,7 @@ class _ChecksheetKomponenReviewPageState
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  widget.user.name,
+                  widget.user.nama ?? 'Pengawas',
                   style: GoogleFonts.inter(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
@@ -1448,7 +1469,7 @@ class _ChecksheetKomponenReviewPageState
     );
   }
 
-  /// Helper: Get status color
+  // Helper: Get status color
   Color _getStatusColor(String status) {
     switch (status) {
       case 'Pending Approval':
@@ -1462,7 +1483,7 @@ class _ChecksheetKomponenReviewPageState
     }
   }
 
-  /// Helper: Format DateTime
+  // Helper: Format DateTime
   String _formatDateTime(String dateTimeStr) {
     try {
       final dateTime = DateTime.parse(dateTimeStr);
@@ -1480,7 +1501,7 @@ class _ChecksheetKomponenReviewPageState
         'Nov',
         'Des',
       ];
-      return '${dateTime.day} ${months[dateTime.month - 1]} ${dateTime.year}, ${dateTime.hour.toString().padLeft(2, '0')}.${dateTime.minute.toString().padLeft(2, '0')}';
+      return '${dateTime.day} ${months[dateTime.month - 1]} ${dateTime.year}, ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
     } catch (e) {
       return dateTimeStr;
     }
